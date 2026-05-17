@@ -1,6 +1,8 @@
 <?php
 
+use App\Application\UseCase\LoginUserUseCase;
 use App\Domain\Repository\UserRepository;
+use App\Infrastructure\Http\LoginUserController;
 use App\Infrastructure\Http\RegisterUserController;
 use App\Infrastructure\Persistence\PostgresUserRepository;
 use DI\ContainerBuilder;
@@ -32,6 +34,10 @@ $container_builder->addDefinitions([
     },
 
     UserRepository::class => autowire(PostgresUserRepository::class),
+    LoginUserUseCase::class => autowire()->constructorParameter(
+        'jwt_secret',
+        getenv('JWT_SECRET')
+    )
 ]);
 
 $container = $container_builder->build();
@@ -47,6 +53,7 @@ $app->addErrorMiddleware(true, true, true);
 
 // 4. Routes
 $app->post('/api/users', RegisterUserController::class);
+$app->post('/api/login', LoginUserController::class);
 
 $app->get('/api/health', function (Request $request, Response $response, $args) {
     $payload = json_encode([
