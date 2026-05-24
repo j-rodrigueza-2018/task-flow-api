@@ -2,13 +2,15 @@
 
 use App\Application\UseCase\LoginUserUseCase;
 use App\Domain\Repository\UserRepository;
-use App\Infrastructure\Http\LoginUserController;
-use App\Infrastructure\Http\RegisterUserController;
+use App\Infrastructure\Http\Controller\LoginUserController;
+use App\Infrastructure\Http\Controller\RegisterUserController;
+use App\Infrastructure\Http\Middleware\AuthMiddleware;
 use App\Infrastructure\Persistence\PostgresUserRepository;
 use DI\ContainerBuilder;
 use Slim\Factory\AppFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Routing\RouteCollectorProxy;
 
 use function DI\autowire;
 
@@ -35,6 +37,11 @@ $container_builder->addDefinitions([
 
     UserRepository::class => autowire(PostgresUserRepository::class),
     LoginUserUseCase::class => autowire()->constructorParameter(
+        'jwt_secret',
+        getenv('JWT_SECRET')
+    ),
+
+    AuthMiddleware::class => autowire()->constructorParameter(
         'jwt_secret',
         getenv('JWT_SECRET')
     )
@@ -65,5 +72,20 @@ $app->get('/api/health', function (Request $request, Response $response, $args) 
     $response->getBody()->write($payload);
     return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
 });
+
+$app->group('/api/private', function (RouteCollectorProxy $group) {
+    $group->get('/me', function (Request $request, Response $response) {
+        $jwt_payload = $request->getAttribute('jwt_payload');
+        
+        $response->getBody()->write(json_encode([
+            'status' => 'success',
+            'message' => 'Valid token. Access granted to protected route.',
+            'user_id' => $jwt_payload->sub,
+            'email' => $jwt_payload->email
+        ]));
+
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+    });
+})->add($container->get(AuthMiddleware::class));
 
 $app->run();

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Http;
+namespace App\Infrastructure\Http\Controller;
 
 use App\Application\UseCase\LoginUserUseCase;
 use Psr\Http\Message\ResponseInterface as Response;
