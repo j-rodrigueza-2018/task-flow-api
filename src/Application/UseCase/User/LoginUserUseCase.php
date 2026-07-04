@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Application\UseCase;
+namespace App\Application\UseCase\User;
 
 use App\Domain\Repository\UserRepository;
 use Firebase\JWT\JWT;

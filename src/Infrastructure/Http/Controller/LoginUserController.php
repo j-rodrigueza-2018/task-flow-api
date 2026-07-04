@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http\Controller;
 
-use App\Application\UseCase\LoginUserUseCase;
+use App\Application\UseCase\User\LoginUserUseCase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 

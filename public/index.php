@@ -1,10 +1,13 @@
 <?php
 
-use App\Application\UseCase\LoginUserUseCase;
+use App\Application\UseCase\Task\CreateTaskUseCase;
+use App\Application\UseCase\User\LoginUserUseCase;
+use App\Domain\Repository\TaskRepository;
 use App\Domain\Repository\UserRepository;
 use App\Infrastructure\Http\Controller\LoginUserController;
 use App\Infrastructure\Http\Controller\RegisterUserController;
 use App\Infrastructure\Http\Middleware\AuthMiddleware;
+use App\Infrastructure\Persistence\PostgresTaskRepository;
 use App\Infrastructure\Persistence\PostgresUserRepository;
 use DI\ContainerBuilder;
 use Slim\Factory\AppFactory;
@@ -40,6 +43,9 @@ $container_builder->addDefinitions([
         'jwt_secret',
         getenv('JWT_SECRET')
     ),
+
+    TaskRepository::class => autowire(PostgresTaskRepository::class),
+    CreateTaskUseCase::class => autowire(),
 
     AuthMiddleware::class => autowire()->constructorParameter(
         'jwt_secret',
