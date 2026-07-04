@@ -4,6 +4,7 @@ use App\Application\UseCase\Task\CreateTaskUseCase;
 use App\Application\UseCase\User\LoginUserUseCase;
 use App\Domain\Repository\TaskRepository;
 use App\Domain\Repository\UserRepository;
+use App\Infrastructure\Http\Controller\CreateTaskController;
 use App\Infrastructure\Http\Controller\LoginUserController;
 use App\Infrastructure\Http\Controller\RegisterUserController;
 use App\Infrastructure\Http\Middleware\AuthMiddleware;
@@ -92,6 +93,8 @@ $app->group('/api/private', function (RouteCollectorProxy $group) {
 
         return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
     });
+
+    $group->post('/tasks', CreateTaskController::class);
 })->add($container->get(AuthMiddleware::class));
 
 $app->run();
