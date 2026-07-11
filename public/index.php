@@ -2,6 +2,7 @@
 
 use App\Application\UseCase\Task\CreateTaskUseCase;
 use App\Application\UseCase\Task\GetUserTasksUseCase;
+use App\Application\UseCase\Task\UpdateTaskUseCase;
 use App\Application\UseCase\User\LoginUserUseCase;
 use App\Domain\Repository\TaskRepository;
 use App\Domain\Repository\UserRepository;
@@ -9,6 +10,7 @@ use App\Infrastructure\Http\Controller\CreateTaskController;
 use App\Infrastructure\Http\Controller\GetUserTasksController;
 use App\Infrastructure\Http\Controller\LoginUserController;
 use App\Infrastructure\Http\Controller\RegisterUserController;
+use App\Infrastructure\Http\Controller\UpdateTaskController;
 use App\Infrastructure\Http\Middleware\AuthMiddleware;
 use App\Infrastructure\Persistence\PostgresTaskRepository;
 use App\Infrastructure\Persistence\PostgresUserRepository;
@@ -50,6 +52,7 @@ $container_builder->addDefinitions([
     TaskRepository::class => autowire(PostgresTaskRepository::class),
     CreateTaskUseCase::class => autowire(),
     GetUserTasksUseCase::class => autowire(),
+    UpdateTaskUseCase::class => autowire(),
 
     AuthMiddleware::class => autowire()->constructorParameter(
         'jwt_secret',
@@ -99,6 +102,7 @@ $app->group('/api/private', function (RouteCollectorProxy $group) {
 
     $group->post('/tasks', CreateTaskController::class);
     $group->get('/tasks', GetUserTasksController::class);
+    $group->patch('/tasks/{id}', UpdateTaskController::class);
 })->add($container->get(AuthMiddleware::class));
 
 $app->run();

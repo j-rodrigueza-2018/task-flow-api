@@ -23,20 +23,24 @@ final class LoginUserController
 
         try {
             $token = $this->use_case->execute($email, $password);
-            $response->getBody()->write(json_encode([
-                'status' => 'success',
-                'message' => 'User logged in successfully.',
-                'token' => $token
-            ]));
+            $response->getBody()->write(
+                json_encode([
+                    'status' => 'success',
+                    'message' => 'User logged in successfully.',
+                    'token' => $token
+                ])
+            );
 
             return $response
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(200);
         } catch (\InvalidArgumentException $exception) {
-            $response->getBody()->write(json_encode([
-                'status' => 'error',
-                'message' => $exception->getMessage()
-            ]));
+            $response->getBody()->write(
+                json_encode([
+                    'status' => 'error',
+                    'message' => $exception->getMessage()
+                ])
+            );
 
             return $response
                 ->withHeader('Content-Type', 'application/json')

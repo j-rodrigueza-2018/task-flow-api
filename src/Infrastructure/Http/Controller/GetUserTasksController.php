@@ -18,8 +18,6 @@ final class GetUserTasksController
     public function __invoke(Request $request, Response $response): Response
     {
         try {
-
-
             $jwt_payload = $request->getAttribute('jwt_payload');
 
             $tasks = $this->use_case->execute($jwt_payload->sub);
@@ -45,11 +43,13 @@ final class GetUserTasksController
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(200);
         } catch (Throwable $exception) {
-            $response->getBody()->write(json_encode([
-                'status' => 'error',
-                'message' => 'An error occurred while retrieving user tasks.',
-                'debug' => $exception->getMessage()
-            ]));
+            $response->getBody()->write(
+                json_encode([
+                    'status' => 'error',
+                    'message' => 'An error occurred while retrieving user tasks.',
+                    'debug' => $exception->getMessage()
+                ])
+            );
 
             return $response
                 ->withHeader('Content-Type', 'application/json')
