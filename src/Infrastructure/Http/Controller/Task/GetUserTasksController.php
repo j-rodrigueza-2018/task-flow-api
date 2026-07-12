@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Http\Controller;
+namespace App\Infrastructure\Http\Controller\Task;
 
 use App\Application\UseCase\Task\GetUserTasksUseCase;
 use Psr\Http\Message\ResponseInterface as Response;

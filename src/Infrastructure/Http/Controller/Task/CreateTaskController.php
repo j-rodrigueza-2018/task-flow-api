@@ -2,43 +2,43 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Http\Controller;
+namespace App\Infrastructure\Http\Controller\Task;
 
-use App\Application\UseCase\Task\UpdateTaskUseCase;
+use App\Application\UseCase\Task\CreateTaskUseCase;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
-final class UpdateTaskController
+final class CreateTaskController
 {
     public function __construct(
-        private readonly UpdateTaskUseCase $use_case
+        private readonly CreateTaskUseCase $use_case
     ) {}
 
-    public function __invoke(Request $request, Response $response, array $args): Response
+    public function __invoke(Request $request, Response $response): Response
     {
         try {
             $jwt_payload = $request->getAttribute('jwt_payload');
-            $task_id = $args['id'];
 
-            $request_data = $request->getParsedBody();
+            $data = $request->getParsedBody();
+
             $task = $this->use_case->execute(
-                task_id: $task_id,
                 user_id: $jwt_payload->sub,
-                title: $request_data['title'] ?? null,
-                description: $request_data['description'] ?? null,
-                status: $request_data['status'] ?? null
+                title: $data['title'] ?? '',
+                description: $data['description'] ?? null
             );
 
             $payload = json_encode([
                 'status' => 'success',
-                'message' => 'Task updated successfully.',
+                'message' => 'Task created successfully.',
                 'data' => [
                     'id' => $task->getId(),
+                    'user_id' => $task->getUserId(),
                     'title' => $task->getTitle(),
                     'description' => $task->getDescription(),
                     'status' => $task->getStatus(),
+                    'created_at' => $task->getCreatedAt()->format('Y-m-d H:i:s'),
                     'updated_at' => $task->getUpdatedAt()->format('Y-m-d H:i:s')
                 ]
             ]);
@@ -47,7 +47,7 @@ final class UpdateTaskController
 
             return $response
                 ->withHeader('Content-Type', 'application/json')
-                ->withStatus(200);
+                ->withStatus(201);
         } catch (InvalidArgumentException $exception) {
             $response->getBody()->write(
                 json_encode([
@@ -63,7 +63,7 @@ final class UpdateTaskController
             $response->getBody()->write(
                 json_encode([
                     'status' => 'error',
-                    'message' => 'An error occurred while updating the task.',
+                    'message' => 'Internal server error.',
                     'debug' => $exception->getMessage()
                 ])
             );
