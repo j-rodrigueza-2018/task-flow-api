@@ -6,6 +6,7 @@ namespace App\Application\UseCase\Task;
 
 use App\Domain\Entity\Task;
 use App\Domain\Repository\TaskRepository;
+use InvalidArgumentException;
 
 final class UpdateTaskUseCase
 {
@@ -17,8 +18,12 @@ final class UpdateTaskUseCase
     {
         $task = $this->task_repository->findById($task_id);
 
-        if (!$task || $task->getUserId() !== $user_id) {
-            throw new \InvalidArgumentException('Task not found or user does not have permission to update this task.');
+        if (!$task) {
+            throw new InvalidArgumentException('Task not found.');
+        }
+
+        if ($task->getUserId() !== $user_id) {
+            throw new InvalidArgumentException('User does not have permission to update this task.');
         }
 
         if ($title !== null) {

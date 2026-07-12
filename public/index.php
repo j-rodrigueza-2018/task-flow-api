@@ -1,12 +1,14 @@
 <?php
 
 use App\Application\UseCase\Task\CreateTaskUseCase;
+use App\Application\UseCase\Task\DeleteTaskUseCase;
 use App\Application\UseCase\Task\GetUserTasksUseCase;
 use App\Application\UseCase\Task\UpdateTaskUseCase;
 use App\Application\UseCase\User\LoginUserUseCase;
 use App\Domain\Repository\TaskRepository;
 use App\Domain\Repository\UserRepository;
 use App\Infrastructure\Http\Controller\CreateTaskController;
+use App\Infrastructure\Http\Controller\DeleteTaskController;
 use App\Infrastructure\Http\Controller\GetUserTasksController;
 use App\Infrastructure\Http\Controller\LoginUserController;
 use App\Infrastructure\Http\Controller\RegisterUserController;
@@ -53,6 +55,7 @@ $container_builder->addDefinitions([
     CreateTaskUseCase::class => autowire(),
     GetUserTasksUseCase::class => autowire(),
     UpdateTaskUseCase::class => autowire(),
+    DeleteTaskUseCase::class => autowire(),
 
     AuthMiddleware::class => autowire()->constructorParameter(
         'jwt_secret',
@@ -89,7 +92,7 @@ $app->get('/api/health', function (Request $request, Response $response, $args) 
 $app->group('/api/private', function (RouteCollectorProxy $group) {
     $group->get('/me', function (Request $request, Response $response) {
         $jwt_payload = $request->getAttribute('jwt_payload');
-        
+
         $response->getBody()->write(json_encode([
             'status' => 'success',
             'message' => 'Valid token. Access granted to protected route.',
@@ -103,6 +106,7 @@ $app->group('/api/private', function (RouteCollectorProxy $group) {
     $group->post('/tasks', CreateTaskController::class);
     $group->get('/tasks', GetUserTasksController::class);
     $group->patch('/tasks/{id}', UpdateTaskController::class);
+    $group->delete('/tasks/{id}', DeleteTaskController::class);
 })->add($container->get(AuthMiddleware::class));
 
 $app->run();

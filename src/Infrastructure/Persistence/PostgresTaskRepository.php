@@ -20,13 +20,14 @@ final class PostgresTaskRepository implements TaskRepository
     public function save(Task $task): void
     {
         $stmt = $this->pdo->prepare(<<<EOH
-            INSERT INTO tasks (id, user_id, title, description, status, created_at, updated_at)
-            VALUES (:id, :user_id, :title, :description, :status, :created_at, :updated_at)
+            INSERT INTO tasks (id, user_id, title, description, status, created_at, updated_at, deleted_at)
+            VALUES (:id, :user_id, :title, :description, :status, :created_at, :updated_at, :deleted_at)
             ON CONFLICT (id) DO UPDATE SET
                 title = EXCLUDED.title,
                 description = EXCLUDED.description,
                 status = EXCLUDED.status,
-                updated_at = EXCLUDED.updated_at
+                updated_at = EXCLUDED.updated_at,
+                deleted_at = EXCLUDED.deleted_at
         EOH);
 
         $stmt->execute([
@@ -37,20 +38,25 @@ final class PostgresTaskRepository implements TaskRepository
             ':status' => $task->getStatus(),
             ':created_at' => $task->getCreatedAt()->format('Y-m-d H:i:s'),
             ':updated_at' => $task->getUpdatedAt()->format('Y-m-d H:i:s'),
+            ':deleted_at' => $task->isDeleted() ? $task->getDeletedAt()->format('Y-m-d H:i:s') : null,
         ]);
     }
 
     #[Override]
     public function delete(Task $task): void
     {
-        $stmt = $this->pdo->prepare('DELETE FROM tasks WHERE id = :id');
-        $stmt->execute([':id' => $task->getId()]);
+        $stmt = $this->pdo->prepare('UPDATE tasks SET updated_at = :updated_at,deleted_at = :deleted_at WHERE id = :id');
+        $stmt->execute([
+            ':id' => $task->getId(),
+            ':updated_at' => $task->getUpdatedAt()->format('Y-m-d H:i:s'),
+            ':deleted_at' => $task->getDeletedAt()->format('Y-m-d H:i:s'),
+        ]);
     }
 
     #[Override]
     public function findById(string $id): ?Task
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM tasks WHERE id = :id');
+        $stmt = $this->pdo->prepare('SELECT * FROM tasks WHERE id = :id AND deleted_at IS NULL');
         $stmt->execute([':id' => $id]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -64,7 +70,7 @@ final class PostgresTaskRepository implements TaskRepository
     #[Override]
     public function findByUserId(string $user_id): array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM tasks WHERE user_id = :user_id');
+        $stmt = $this->pdo->prepare('SELECT * FROM tasks WHERE user_id = :user_id AND deleted_at IS NULL ORDER BY created_at DESC');
         $stmt->execute([':user_id' => $user_id]);
 
         $tasks = [];
@@ -85,13 +91,14 @@ final class PostgresTaskRepository implements TaskRepository
     private function hydrate(array $row_data): Task
     {
         return new Task(
-            $row_data['id'],
-            $row_data['user_id'],
-            $row_data['title'],
-            $row_data['description'],
-            $row_data['status'],
-            new DateTimeImmutable($row_data['created_at']),
-            new DateTimeImmutable($row_data['updated_at'])
+            id: $row_data['id'],
+            user_id: $row_data['user_id'],
+            title: $row_data['title'],
+            description: $row_data['description'],
+            status: $row_data['status'],
+            created_at: new DateTimeImmutable($row_data['created_at']),
+            updated_at: new DateTimeImmutable($row_data['updated_at']),
+            deleted_at: isset($row_data['deleted_at']) ? new DateTimeImmutable($row_data['deleted_at']) : null
         );
     }
 }

@@ -26,10 +26,12 @@ final class RegisterUserController
 
         try {
             $this->use_case->execute($nickname, $email, $password);
-            $response->getBody()->write(json_encode([
-                'status' => 'success',
-                'message' => 'User registered successfully.'
-            ]));
+            $response->getBody()->write(
+                json_encode([
+                    'status' => 'success',
+                    'message' => 'User registered successfully.'
+                ])
+            );
 
             return $response
                 ->withHeader('Content-Type', 'application/json')

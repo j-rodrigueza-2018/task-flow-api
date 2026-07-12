@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Entity;
 
 use DateTimeImmutable;
+use DomainException;
 
 final class Task
 {
@@ -25,7 +26,8 @@ final class Task
         private ?string $description,
         private string $status,
         private readonly DateTimeImmutable $created_at,
-        private DateTimeImmutable $updated_at
+        private DateTimeImmutable $updated_at,
+        private ?DateTimeImmutable $deleted_at = null
     ) {
         if (trim($title) === '') {
             throw new \InvalidArgumentException('The title cannot be empty.');
@@ -75,6 +77,16 @@ final class Task
         return $this->updated_at;
     }
 
+    public function getDeletedAt(): ?DateTimeImmutable
+    {
+        return $this->deleted_at;
+    }
+
+    public function isDeleted(): bool
+    {
+        return $this->deleted_at !== null;
+    }
+
     public function updateTitle(string $title): void
     {
         if (trim($title) === '') {
@@ -102,6 +114,16 @@ final class Task
         }
 
         $this->status = $status;
+        $this->markAsUpdated();
+    }
+
+    public function delete(): void
+    {
+        if ($this->isDeleted()) {
+            throw new DomainException('The task is already deleted.');
+        }
+
+        $this->deleted_at = new DateTimeImmutable();
         $this->markAsUpdated();
     }
 
