@@ -6,6 +6,7 @@ namespace App\Domain\Entity;
 
 use DateTimeImmutable;
 use DomainException;
+use InvalidArgumentException;
 
 final class Task
 {
@@ -25,21 +26,13 @@ final class Task
         private string $title,
         private ?string $description,
         private string $status,
+        private string $board_id,
         private readonly DateTimeImmutable $created_at,
         private DateTimeImmutable $updated_at,
         private ?DateTimeImmutable $deleted_at = null
     ) {
-        if (trim($title) === '') {
-            throw new \InvalidArgumentException('The title cannot be empty.');
-        }
-
-        if (strlen($title) < 3 || strlen($title) > 255) {
-            throw new \InvalidArgumentException('The title must be between 3 and 255 characters long.');
-        }
-
-        if (!in_array($status, self::ALLOWED_STATUSES, true)) {
-            throw new \InvalidArgumentException('The status must be one of the allowed statuses: ' . implode(', ', self::ALLOWED_STATUSES));
-        }
+        $this->validateTitle($title);
+        $this->validateStatus($status);
     }
 
     public function getId(): string
@@ -67,6 +60,11 @@ final class Task
         return $this->status;
     }
 
+    public function getBoardId(): string
+    {
+        return $this->board_id;
+    }
+
     public function getCreatedAt(): DateTimeImmutable
     {
         return $this->created_at;
@@ -89,13 +87,7 @@ final class Task
 
     public function updateTitle(string $title): void
     {
-        if (trim($title) === '') {
-            throw new \InvalidArgumentException('The title cannot be empty.');
-        }
-
-        if (strlen($title) < 3 || strlen($title) > 255) {
-            throw new \InvalidArgumentException('The title must be between 3 and 255 characters long.');
-        }
+        $this->validateTitle($title);
 
         $this->title = $title;
         $this->markAsUpdated();
@@ -109,11 +101,19 @@ final class Task
 
     public function updateStatus(string $status): void
     {
-        if (!in_array($status, self::ALLOWED_STATUSES, true)) {
-            throw new \InvalidArgumentException('The status must be one of the allowed statuses: ' . implode(', ', self::ALLOWED_STATUSES));
-        }
+        $this->validateStatus($status);
 
         $this->status = $status;
+        $this->markAsUpdated();
+    }
+
+    public function moveToBoard(string $board_id): void
+    {
+        if (trim($board_id) === '') {
+            throw new InvalidArgumentException('The board ID cannot be empty.');
+        }
+
+        $this->board_id = $board_id;
         $this->markAsUpdated();
     }
 
@@ -125,6 +125,24 @@ final class Task
 
         $this->deleted_at = new DateTimeImmutable();
         $this->markAsUpdated();
+    }
+
+    private function validateTitle(string $title): void
+    {
+        if (trim($title) === '') {
+            throw new InvalidArgumentException('The title cannot be empty.');
+        }
+
+        if (strlen($title) < 3 || strlen($title) > 255) {
+            throw new InvalidArgumentException('The title must be between 3 and 255 characters long.');
+        }
+    }
+
+    private function validateStatus(string $status): void
+    {
+        if (!in_array($status, self::ALLOWED_STATUSES, true)) {
+            throw new InvalidArgumentException('The status must be one of the allowed statuses: ' . implode(', ', self::ALLOWED_STATUSES));
+        }
     }
 
     private function markAsUpdated(): void
