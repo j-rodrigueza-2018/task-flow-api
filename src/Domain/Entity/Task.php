@@ -33,6 +33,7 @@ final class Task
     ) {
         $this->validateTitle($title);
         $this->validateStatus($status);
+        $this->validateBoardId($board_id);
     }
 
     public function getId(): string
@@ -109,9 +110,7 @@ final class Task
 
     public function moveToBoard(string $board_id): void
     {
-        if (trim($board_id) === '') {
-            throw new InvalidArgumentException('The board ID cannot be empty.');
-        }
+        $this->validateBoardId($board_id);
 
         $this->board_id = $board_id;
         $this->markAsUpdated();
@@ -142,6 +141,13 @@ final class Task
     {
         if (!in_array($status, self::ALLOWED_STATUSES, true)) {
             throw new InvalidArgumentException('The status must be one of the allowed statuses: ' . implode(', ', self::ALLOWED_STATUSES));
+        }
+    }
+
+    private function validateBoardId(string $board_id): void
+    {
+        if (trim($board_id) === '') {
+            throw new InvalidArgumentException('The board ID cannot be empty.');
         }
     }
 

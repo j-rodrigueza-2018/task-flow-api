@@ -20,12 +20,13 @@ final class PostgresTaskRepository implements TaskRepository
     public function save(Task $task): void
     {
         $stmt = $this->pdo->prepare(<<<EOH
-            INSERT INTO tasks (id, user_id, title, description, status, created_at, updated_at, deleted_at)
-            VALUES (:id, :user_id, :title, :description, :status, :created_at, :updated_at, :deleted_at)
+            INSERT INTO tasks (id, user_id, title, description, status, board_id, created_at, updated_at, deleted_at)
+            VALUES (:id, :user_id, :title, :description, :status, :board_id, :created_at, :updated_at, :deleted_at)
             ON CONFLICT (id) DO UPDATE SET
                 title = EXCLUDED.title,
                 description = EXCLUDED.description,
                 status = EXCLUDED.status,
+                board_id = EXCLUDED.board_id,
                 updated_at = EXCLUDED.updated_at,
                 deleted_at = EXCLUDED.deleted_at
         EOH);
@@ -36,6 +37,7 @@ final class PostgresTaskRepository implements TaskRepository
             ':title' => $task->getTitle(),
             ':description' => $task->getDescription(),
             ':status' => $task->getStatus(),
+            ':board_id' => $task->getBoardId(),
             ':created_at' => $task->getCreatedAt()->format('Y-m-d H:i:s'),
             ':updated_at' => $task->getUpdatedAt()->format('Y-m-d H:i:s'),
             ':deleted_at' => $task->isDeleted() ? $task->getDeletedAt()->format('Y-m-d H:i:s') : null,
@@ -96,6 +98,7 @@ final class PostgresTaskRepository implements TaskRepository
             title: $row_data['title'],
             description: $row_data['description'],
             status: $row_data['status'],
+            board_id: $row_data['board_id'],
             created_at: new DateTimeImmutable($row_data['created_at']),
             updated_at: new DateTimeImmutable($row_data['updated_at']),
             deleted_at: isset($row_data['deleted_at']) ? new DateTimeImmutable($row_data['deleted_at']) : null
