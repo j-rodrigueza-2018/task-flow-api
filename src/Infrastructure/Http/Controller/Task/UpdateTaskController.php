@@ -28,7 +28,8 @@ final class UpdateTaskController
                 user_id: $jwt_payload->sub,
                 title: $request_data['title'] ?? null,
                 description: $request_data['description'] ?? null,
-                status: $request_data['status'] ?? null
+                status: $request_data['status'] ?? null,
+                board_id: $request_data['board_id'] ?? null
             );
 
             $payload = json_encode([
@@ -36,6 +37,7 @@ final class UpdateTaskController
                 'message' => 'Task updated successfully.',
                 'data' => [
                     'id' => $task->getId(),
+                    'board_id' => $task->getBoardId(),
                     'title' => $task->getTitle(),
                     'description' => $task->getDescription(),
                     'status' => $task->getStatus(),

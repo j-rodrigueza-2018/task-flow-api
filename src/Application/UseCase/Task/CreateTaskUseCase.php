@@ -14,11 +14,12 @@ final class CreateTaskUseCase
         private readonly TaskRepository $task_repository
     ) {}
 
-    public function execute(string $user_id, string $title, ?string $description = null): Task
+    public function execute(string $user_id, string $board_id, string $title, ?string $description = null): Task
     {
         $task = new Task(
             uuid_create(UUID_TYPE_RANDOM),
             $user_id,
+            $board_id,
             $title,
             $description,
             Task::STATUS_PENDING,

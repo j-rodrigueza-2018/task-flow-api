@@ -14,7 +14,7 @@ final class UpdateTaskUseCase
         private readonly TaskRepository $task_repository
     ) {}
 
-    public function execute(string $task_id, string $user_id, ?string $title, ?string $description, ?string $status): Task
+    public function execute(string $task_id, string $user_id, ?string $title, ?string $description, ?string $status, ?string $board_id): Task
     {
         $task = $this->task_repository->findById($task_id);
 
@@ -36,6 +36,10 @@ final class UpdateTaskUseCase
 
         if ($status !== null) {
             $task->updateStatus($status);
+        }
+
+        if ($board_id !== null) {
+            $task->moveToBoard($board_id);
         }
 
         $this->task_repository->save($task);
