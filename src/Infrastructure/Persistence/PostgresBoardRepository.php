@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence;
 
 use App\Domain\Entity\Board;
+use App\Domain\Entity\BoardUser;
 use App\Domain\Enum\BoardRole;
 use App\Domain\Repository\BoardRepository;
 use DateTimeImmutable;
@@ -79,10 +80,8 @@ final class PostgresBoardRepository implements BoardRepository
     }
 
     #[Override]
-    public function addUserToBoard(string $board_id, string $user_id, BoardRole $role): void
+    public function addUserToBoard(BoardUser $board_user): void
     {
-        $now = (new DateTimeImmutable())->format('Y-m-d H:i:s');
-
         $stmt = $this->pdo->prepare(<<<EOH
             INSERT INTO board_users (id, board_id, user_id, role, created_at, updated_at) 
             VALUES (:id, :board_id, :user_id, :role, :created_at, :updated_at) 
@@ -92,12 +91,12 @@ final class PostgresBoardRepository implements BoardRepository
         EOH);
 
         $stmt->execute([
-            ':id' => uuid_create(UUID_TYPE_RANDOM),
-            ':board_id' => $board_id,
-            ':user_id' => $user_id,
-            ':role' => $role->value,
-            ':created_at' => $now,
-            ':updated_at' => $now
+            ':id' => $board_user->getId(),
+            ':board_id' => $board_user->getBoardId(),
+            ':user_id' => $board_user->getUserId(),
+            ':role' => $board_user->getRole()->value,
+            ':created_at' => $board_user->getCreatedAt()->format('Y-m-d H:i:s'),
+            ':updated_at' => $board_user->getUpdatedAt()->format('Y-m-d H:i:s')
         ]);
     }
 

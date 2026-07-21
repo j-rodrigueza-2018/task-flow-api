@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Repository;
 
 use App\Domain\Entity\Board;
-use App\Domain\Enum\BoardRole;
+use App\Domain\Entity\BoardUser;
 
 interface BoardRepository
 {
@@ -44,13 +44,11 @@ interface BoardRepository
     public function findAll(): array;
 
     /**
-     * Adds a user to a board.
+     * Associates a user to a board.
      * 
-     * @param string $board_id The ID of the board to add the user to.
-     * @param string $user_id The ID of the user to add.
-     * @param BoardRole $role The role of the user in the board.
+     * @param BoardUser $board_user The entity that represents the relationship.
      * 
      * @return void
      */
-    public function addUserToBoard(string $board_id, string $user_id, BoardRole $role): void;
+    public function addUserToBoard(BoardUser $board_user): void;
 }
