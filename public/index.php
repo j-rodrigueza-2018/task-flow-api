@@ -1,12 +1,15 @@
 <?php
 
+use App\Application\UseCase\Board\CreateBoardUseCase;
 use App\Application\UseCase\Task\CreateTaskUseCase;
 use App\Application\UseCase\Task\DeleteTaskUseCase;
 use App\Application\UseCase\Task\GetUserTasksUseCase;
 use App\Application\UseCase\Task\UpdateTaskUseCase;
 use App\Application\UseCase\User\LoginUserUseCase;
+use App\Domain\Repository\BoardRepository;
 use App\Domain\Repository\TaskRepository;
 use App\Domain\Repository\UserRepository;
+use App\Infrastructure\Http\Controller\Board\CreateBoardController;
 use App\Infrastructure\Http\Controller\Task\CreateTaskController;
 use App\Infrastructure\Http\Controller\Task\DeleteTaskController;
 use App\Infrastructure\Http\Controller\Task\GetUserTasksController;
@@ -14,6 +17,7 @@ use App\Infrastructure\Http\Controller\User\LoginUserController;
 use App\Infrastructure\Http\Controller\User\RegisterUserController;
 use App\Infrastructure\Http\Controller\Task\UpdateTaskController;
 use App\Infrastructure\Http\Middleware\AuthMiddleware;
+use App\Infrastructure\Persistence\PostgresBoardRepository;
 use App\Infrastructure\Persistence\PostgresTaskRepository;
 use App\Infrastructure\Persistence\PostgresUserRepository;
 use DI\ContainerBuilder;
@@ -56,6 +60,9 @@ $container_builder->addDefinitions([
     GetUserTasksUseCase::class => autowire(),
     UpdateTaskUseCase::class => autowire(),
     DeleteTaskUseCase::class => autowire(),
+
+    BoardRepository::class => autowire(PostgresBoardRepository::class),
+    CreateBoardUseCase::class => autowire(),
 
     AuthMiddleware::class => autowire()->constructorParameter(
         'jwt_secret',
@@ -103,6 +110,10 @@ $app->group('/api/private', function (RouteCollectorProxy $group) {
         return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
     });
 
+    // Board routes
+    $group->post('/boards', CreateBoardController::class);
+
+    // Task routes
     $group->post('/tasks', CreateTaskController::class);
     $group->get('/tasks', GetUserTasksController::class);
     $group->patch('/tasks/{id}', UpdateTaskController::class);

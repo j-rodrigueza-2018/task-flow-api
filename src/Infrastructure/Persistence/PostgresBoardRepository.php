@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence;
 
 use App\Domain\Entity\Board;
+use App\Domain\Enum\BoardRole;
 use App\Domain\Repository\BoardRepository;
 use DateTimeImmutable;
 use Override;
@@ -75,6 +76,29 @@ final class PostgresBoardRepository implements BoardRepository
         }
 
         return $boards;
+    }
+
+    #[Override]
+    public function addUserToBoard(string $board_id, string $user_id, BoardRole $role): void
+    {
+        $now = (new DateTimeImmutable())->format('Y-m-d H:i:s');
+
+        $stmt = $this->pdo->prepare(<<<EOH
+            INSERT INTO board_users (id, board_id, user_id, role, created_at, updated_at) 
+            VALUES (:id, :board_id, :user_id, :role, :created_at, :updated_at) 
+            ON CONFLICT (board_id, user_id) DO UPDATE SET 
+                role = EXCLUDED.role,
+                updated_at = EXCLUDED.updated_at
+        EOH);
+
+        $stmt->execute([
+            ':id' => uuid_create(UUID_TYPE_RANDOM),
+            ':board_id' => $board_id,
+            ':user_id' => $user_id,
+            ':role' => $role->value,
+            ':created_at' => $now,
+            ':updated_at' => $now
+        ]);
     }
 
     /**
