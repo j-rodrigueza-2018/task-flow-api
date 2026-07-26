@@ -1,5 +1,6 @@
 <?php
 
+use App\Application\UseCase\Board\AddUserToBoardUseCase;
 use App\Application\UseCase\Board\CreateBoardUseCase;
 use App\Application\UseCase\Board\DeleteBoardUseCase;
 use App\Application\UseCase\Board\UpdateBoardUseCase;
@@ -9,8 +10,10 @@ use App\Application\UseCase\Task\GetUserTasksUseCase;
 use App\Application\UseCase\Task\UpdateTaskUseCase;
 use App\Application\UseCase\User\LoginUserUseCase;
 use App\Domain\Repository\BoardRepository;
+use App\Domain\Repository\BoardUserRepository;
 use App\Domain\Repository\TaskRepository;
 use App\Domain\Repository\UserRepository;
+use App\Infrastructure\Http\Controller\Board\AddUserToBoardController;
 use App\Infrastructure\Http\Controller\Board\CreateBoardController;
 use App\Infrastructure\Http\Controller\Board\DeleteBoardController;
 use App\Infrastructure\Http\Controller\Board\UpdateBoardController;
@@ -22,6 +25,7 @@ use App\Infrastructure\Http\Controller\User\RegisterUserController;
 use App\Infrastructure\Http\Controller\Task\UpdateTaskController;
 use App\Infrastructure\Http\Middleware\AuthMiddleware;
 use App\Infrastructure\Persistence\PostgresBoardRepository;
+use App\Infrastructure\Persistence\PostgresBoardUserRepository;
 use App\Infrastructure\Persistence\PostgresTaskRepository;
 use App\Infrastructure\Persistence\PostgresUserRepository;
 use DI\ContainerBuilder;
@@ -69,6 +73,9 @@ $container_builder->addDefinitions([
     CreateBoardUseCase::class => autowire(),
     UpdateBoardUseCase::class => autowire(),
     DeleteBoardUseCase::class => autowire(),
+
+    BoardUserRepository::class => autowire(PostgresBoardUserRepository::class),
+    AddUserToBoardUseCase::class => autowire(),
 
     AuthMiddleware::class => autowire()->constructorParameter(
         'jwt_secret',
@@ -120,6 +127,7 @@ $app->group('/api/private', function (RouteCollectorProxy $group) {
     $group->post('/boards', CreateBoardController::class);
     $group->patch('/boards/{id}', UpdateBoardController::class);
     $group->delete('/boards/{id}', DeleteBoardController::class);
+    $group->post('/boards/{id}/users', AddUserToBoardController::class);
 
     // Task routes
     $group->post('/tasks', CreateTaskController::class);

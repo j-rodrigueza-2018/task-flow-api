@@ -29,7 +29,7 @@ final class PostgresBoardUserRepository implements BoardUserRepository
             'id' => $board_user->getId(),
             'board_id' => $board_user->getBoardId(),
             'user_id' => $board_user->getUserId(),
-            'role' => $board_user->getRole(),
+            'role' => $board_user->getRole()->value,
             'created_at' => $board_user->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $board_user->getUpdatedAt()->format('Y-m-d H:i:s')
         ]);
