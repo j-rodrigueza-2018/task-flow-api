@@ -3,6 +3,7 @@
 use App\Application\UseCase\Board\AddUserToBoardUseCase;
 use App\Application\UseCase\Board\CreateBoardUseCase;
 use App\Application\UseCase\Board\DeleteBoardUseCase;
+use App\Application\UseCase\Board\DeleteUserFromBoardUseCase;
 use App\Application\UseCase\Board\UpdateBoardUseCase;
 use App\Application\UseCase\Task\CreateTaskUseCase;
 use App\Application\UseCase\Task\DeleteTaskUseCase;
@@ -16,6 +17,7 @@ use App\Domain\Repository\UserRepository;
 use App\Infrastructure\Http\Controller\Board\AddUserToBoardController;
 use App\Infrastructure\Http\Controller\Board\CreateBoardController;
 use App\Infrastructure\Http\Controller\Board\DeleteBoardController;
+use App\Infrastructure\Http\Controller\Board\DeleteUserFromBoardController;
 use App\Infrastructure\Http\Controller\Board\UpdateBoardController;
 use App\Infrastructure\Http\Controller\Task\CreateTaskController;
 use App\Infrastructure\Http\Controller\Task\DeleteTaskController;
@@ -76,6 +78,7 @@ $container_builder->addDefinitions([
 
     BoardUserRepository::class => autowire(PostgresBoardUserRepository::class),
     AddUserToBoardUseCase::class => autowire(),
+    DeleteUserFromBoardUseCase::class => autowire(),
 
     AuthMiddleware::class => autowire()->constructorParameter(
         'jwt_secret',
@@ -128,6 +131,7 @@ $app->group('/api/private', function (RouteCollectorProxy $group) {
     $group->patch('/boards/{id}', UpdateBoardController::class);
     $group->delete('/boards/{id}', DeleteBoardController::class);
     $group->post('/boards/{id}/users', AddUserToBoardController::class);
+    $group->delete('/boards/{id}/users/{user_id}', DeleteUserFromBoardController::class);
 
     // Task routes
     $group->post('/tasks', CreateTaskController::class);

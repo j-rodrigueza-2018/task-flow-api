@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence;
 
 use App\Domain\Entity\BoardUser;
+use App\Domain\Enum\BoardRole;
 use App\Domain\Repository\BoardUserRepository;
 use DateTimeImmutable;
 use Override;
@@ -64,7 +65,7 @@ final class PostgresBoardUserRepository implements BoardUserRepository
             id: $row['id'],
             board_id: $row['board_id'],
             user_id: $row['user_id'],
-            role: $row['role'],
+            role: BoardRole::from($row['role']),
             created_at: new DateTimeImmutable($row['created_at']),
             updated_at: new DateTimeImmutable($row['updated_at'])
         );
