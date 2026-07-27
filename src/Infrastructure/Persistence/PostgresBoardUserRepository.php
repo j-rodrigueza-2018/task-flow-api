@@ -7,6 +7,7 @@ namespace App\Infrastructure\Persistence;
 use App\Domain\Entity\BoardUser;
 use App\Domain\Repository\BoardUserRepository;
 use DateTimeImmutable;
+use Override;
 use PDO;
 
 final class PostgresBoardUserRepository implements BoardUserRepository
@@ -32,6 +33,16 @@ final class PostgresBoardUserRepository implements BoardUserRepository
             'role' => $board_user->getRole()->value,
             'created_at' => $board_user->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $board_user->getUpdatedAt()->format('Y-m-d H:i:s')
+        ]);
+    }
+
+    #[Override]
+    public function delete(string $board_id, string $user_id): void
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM board_users WHERE board_id = :board_id AND user_id = :user_id');
+        $stmt->execute([
+            'board_id' => $board_id,
+            'user_id' => $user_id
         ]);
     }
 
