@@ -11,7 +11,7 @@ interface BoardUserRepository
     /**
      * Saves or updates the relationship between a user with a board.
      * 
-     * @param BoardUser $board_user The relation to save.
+     * @param BoardUser $board_user The relationship to save.
      * 
      * @return void
      */
