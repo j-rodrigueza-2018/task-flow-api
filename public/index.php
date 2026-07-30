@@ -5,6 +5,7 @@ use App\Application\UseCase\Board\CreateBoardUseCase;
 use App\Application\UseCase\Board\DeleteBoardUseCase;
 use App\Application\UseCase\Board\DeleteUserFromBoardUseCase;
 use App\Application\UseCase\Board\UpdateBoardUseCase;
+use App\Application\UseCase\Task\AddUserToTaskUseCase;
 use App\Application\UseCase\Task\CreateTaskUseCase;
 use App\Application\UseCase\Task\DeleteTaskUseCase;
 use App\Application\UseCase\Task\GetUserTasksUseCase;
@@ -13,12 +14,14 @@ use App\Application\UseCase\User\LoginUserUseCase;
 use App\Domain\Repository\BoardRepository;
 use App\Domain\Repository\BoardUserRepository;
 use App\Domain\Repository\TaskRepository;
+use App\Domain\Repository\TaskUserRepository;
 use App\Domain\Repository\UserRepository;
 use App\Infrastructure\Http\Controller\Board\AddUserToBoardController;
 use App\Infrastructure\Http\Controller\Board\CreateBoardController;
 use App\Infrastructure\Http\Controller\Board\DeleteBoardController;
 use App\Infrastructure\Http\Controller\Board\DeleteUserFromBoardController;
 use App\Infrastructure\Http\Controller\Board\UpdateBoardController;
+use App\Infrastructure\Http\Controller\Task\AddUserToTaskController;
 use App\Infrastructure\Http\Controller\Task\CreateTaskController;
 use App\Infrastructure\Http\Controller\Task\DeleteTaskController;
 use App\Infrastructure\Http\Controller\Task\GetUserTasksController;
@@ -29,6 +32,7 @@ use App\Infrastructure\Http\Middleware\AuthMiddleware;
 use App\Infrastructure\Persistence\PostgresBoardRepository;
 use App\Infrastructure\Persistence\PostgresBoardUserRepository;
 use App\Infrastructure\Persistence\PostgresTaskRepository;
+use App\Infrastructure\Persistence\PostgresTaskUserRepository;
 use App\Infrastructure\Persistence\PostgresUserRepository;
 use DI\ContainerBuilder;
 use Slim\Factory\AppFactory;
@@ -70,6 +74,9 @@ $container_builder->addDefinitions([
     GetUserTasksUseCase::class => autowire(),
     UpdateTaskUseCase::class => autowire(),
     DeleteTaskUseCase::class => autowire(),
+
+    TaskUserRepository::class => autowire(PostgresTaskUserRepository::class),
+    AddUserToTaskUseCase::class => autowire(),
 
     BoardRepository::class => autowire(PostgresBoardRepository::class),
     CreateBoardUseCase::class => autowire(),
@@ -138,6 +145,7 @@ $app->group('/api/private', function (RouteCollectorProxy $group) {
     $group->get('/tasks', GetUserTasksController::class);
     $group->patch('/tasks/{id}', UpdateTaskController::class);
     $group->delete('/tasks/{id}', DeleteTaskController::class);
+    $group->post('/tasks/{id}/users', AddUserToTaskController::class);
 })->add($container->get(AuthMiddleware::class));
 
 $app->run();
