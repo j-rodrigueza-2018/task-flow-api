@@ -2,32 +2,32 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Http\Controller\Board;
+namespace App\Infrastructure\Http\Controller\Task;
 
-use App\Application\UseCase\Board\DeleteUserFromBoardUseCase;
+use App\Application\UseCase\Task\DeleteUserFromTaskUseCase;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
-final class DeleteUserFromBoardController
+final class DeleteUserFromTaskController
 {
     public function __construct(
-        private readonly DeleteUserFromBoardUseCase $use_case
+        private readonly DeleteUserFromTaskUseCase $use_case
     ) {}
 
     public function __invoke(Request $request, Response $response, array $args): Response
     {
         try {
             $this->use_case->execute(
-                board_id: $args['id'] ?? '',
-                user_id: $args['user_id'] ?? ''
+                task_id: $args['id'] ?? '',
+                user_id: $args['user_id'] ?? '',
             );
 
             $response->getBody()->write(
                 json_encode([
                     'status' => 'success',
-                    'message' => 'User deleted from the board successfully.'
+                    'message' => 'User removed from the task successfully.'
                 ])
             );
 
@@ -44,12 +44,12 @@ final class DeleteUserFromBoardController
 
             return $response
                 ->withHeader('Content-Type', 'application/json')
-                ->withStatus(404);
+                ->withStatus(400);
         } catch (Throwable $exception) {
             $response->getBody()->write(
                 json_encode([
                     'status' => 'error',
-                    'message' => 'An unexpected error ocurred while deleting the user from the board.',
+                    'message' => 'An unexpected error occurred while deleting the user from the task.',
                     'debug' => $exception->getMessage()
                 ])
             );
