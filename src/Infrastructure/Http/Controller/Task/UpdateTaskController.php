@@ -22,7 +22,7 @@ final class UpdateTaskController
             $jwt_payload = $request->getAttribute('jwt_payload');
             $task_id = $args['id'];
 
-            $request_data = $request->getParsedBody();
+            $request_data = (array) $request->getParsedBody();
             $task = $this->use_case->execute(
                 task_id: $task_id,
                 user_id: $jwt_payload->sub,

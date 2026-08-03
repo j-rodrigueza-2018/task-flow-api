@@ -22,7 +22,6 @@ final class Task
 
     public function __construct(
         private readonly string $id,
-        private readonly string $user_id,
         private string $title,
         private ?string $description,
         private string $status,
@@ -39,11 +38,6 @@ final class Task
     public function getId(): string
     {
         return $this->id;
-    }
-
-    public function getUserId(): string
-    {
-        return $this->user_id;
     }
 
     public function getTitle(): string

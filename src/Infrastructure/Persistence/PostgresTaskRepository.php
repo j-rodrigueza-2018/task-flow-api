@@ -20,8 +20,8 @@ final class PostgresTaskRepository implements TaskRepository
     public function save(Task $task): void
     {
         $stmt = $this->pdo->prepare(<<<EOH
-            INSERT INTO tasks (id, user_id, title, description, status, board_id, created_at, updated_at, deleted_at)
-            VALUES (:id, :user_id, :title, :description, :status, :board_id, :created_at, :updated_at, :deleted_at)
+            INSERT INTO tasks (id, title, description, status, board_id, created_at, updated_at, deleted_at)
+            VALUES (:id, :title, :description, :status, :board_id, :created_at, :updated_at, :deleted_at)
             ON CONFLICT (id) DO UPDATE SET
                 title = EXCLUDED.title,
                 description = EXCLUDED.description,
@@ -33,7 +33,6 @@ final class PostgresTaskRepository implements TaskRepository
 
         $stmt->execute([
             ':id' => $task->getId(),
-            ':user_id' => $task->getUserId(),
             ':title' => $task->getTitle(),
             ':description' => $task->getDescription(),
             ':status' => $task->getStatus(),
@@ -72,7 +71,17 @@ final class PostgresTaskRepository implements TaskRepository
     #[Override]
     public function findByUserId(string $user_id): array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM tasks WHERE user_id = :user_id AND deleted_at IS NULL ORDER BY created_at DESC');
+        $stmt = $this->pdo->prepare(<<<EOH
+            SELECT 
+                T.*
+            FROM tasks T
+            JOIN task_users TU ON T.id = TU.task_id
+            WHERE
+                TU.user_id = :user_id
+                AND T.deleted_at IS NULL
+            ORDER BY T.created_at DESC
+        EOH);
+
         $stmt->execute([':user_id' => $user_id]);
 
         $tasks = [];
@@ -94,7 +103,6 @@ final class PostgresTaskRepository implements TaskRepository
     {
         return new Task(
             id: $row_data['id'],
-            user_id: $row_data['user_id'],
             title: $row_data['title'],
             description: $row_data['description'],
             status: $row_data['status'],

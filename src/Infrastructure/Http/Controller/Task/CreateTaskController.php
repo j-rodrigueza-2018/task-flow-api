@@ -21,10 +21,10 @@ final class CreateTaskController
         try {
             $jwt_payload = $request->getAttribute('jwt_payload');
 
-            $data = $request->getParsedBody();
+            $data = (array) $request->getParsedBody();
 
             $task = $this->use_case->execute(
-                user_id: $jwt_payload->sub,
+                user_id: $jwt_payload->sub ?? '',
                 board_id: $data['board_id'] ?? '',
                 title: $data['title'] ?? '',
                 description: $data['description'] ?? null
@@ -35,7 +35,6 @@ final class CreateTaskController
                 'message' => 'Task created successfully.',
                 'data' => [
                     'id' => $task->getId(),
-                    'user_id' => $task->getUserId(),
                     'board_id' => $task->getBoardId(),
                     'title' => $task->getTitle(),
                     'description' => $task->getDescription(),
