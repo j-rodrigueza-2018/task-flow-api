@@ -37,6 +37,15 @@ interface BoardRepository
     public function findById(string $id): ?Board;
 
     /**
+     * Finds all boards a user is part of.
+     * 
+     * @param string $user_id The ID of the user.
+     * 
+     * @return Board[] An array of boards the user is part of.
+     */
+    public function findByUserId(string $user_id): array;
+
+    /**
      * Finds all boards in the repository.
      * 
      * @return Board[] An array of all boards.

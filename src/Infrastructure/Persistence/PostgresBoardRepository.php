@@ -67,6 +67,30 @@ final class PostgresBoardRepository implements BoardRepository
     }
 
     #[Override]
+    public function findByUserId(string $user_id): array
+    {
+        $stmt = $this->pdo->prepare(<<<EOH
+            SELECT
+                B.*
+            FROM boards B
+            JOIN board_users BU ON B.id = BU.board_id
+            WHERE
+                BU.user_id = :user_id
+                AND B.deleted_at IS NULL
+            ORDER BY B.created_at DESC
+        EOH);
+
+        $stmt->execute([':user_id' => $user_id]);
+
+        $boards = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $boards[] = $this->hydrate($row);
+        }
+
+        return $boards;
+    }
+
+    #[Override]
     public function findAll(): array
     {
         $stmt = $this->pdo->query('SELECT * FROM boards WHERE deleted_at IS NULL ORDER BY created_at DESC');
