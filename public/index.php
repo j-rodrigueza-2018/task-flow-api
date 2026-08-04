@@ -4,6 +4,7 @@ use App\Application\UseCase\Board\AddUserToBoardUseCase;
 use App\Application\UseCase\Board\CreateBoardUseCase;
 use App\Application\UseCase\Board\DeleteBoardUseCase;
 use App\Application\UseCase\Board\DeleteUserFromBoardUseCase;
+use App\Application\UseCase\Board\GetBoardTasksUseCase;
 use App\Application\UseCase\Board\GetUserBoardsUseCase;
 use App\Application\UseCase\Board\UpdateBoardUseCase;
 use App\Application\UseCase\Task\AddUserToTaskUseCase;
@@ -22,6 +23,7 @@ use App\Infrastructure\Http\Controller\Board\AddUserToBoardController;
 use App\Infrastructure\Http\Controller\Board\CreateBoardController;
 use App\Infrastructure\Http\Controller\Board\DeleteBoardController;
 use App\Infrastructure\Http\Controller\Board\DeleteUserFromBoardController;
+use App\Infrastructure\Http\Controller\Board\GetBoardTasksController;
 use App\Infrastructure\Http\Controller\Board\GetUserBoardsController;
 use App\Infrastructure\Http\Controller\Board\UpdateBoardController;
 use App\Infrastructure\Http\Controller\Task\AddUserToTaskController;
@@ -88,6 +90,7 @@ $container_builder->addDefinitions([
     UpdateBoardUseCase::class => autowire(),
     DeleteBoardUseCase::class => autowire(),
     GetUserBoardsUseCase::class => autowire(),
+    GetBoardTasksUseCase::class => autowire(),
 
     BoardUserRepository::class => autowire(PostgresBoardUserRepository::class),
     AddUserToBoardUseCase::class => autowire(),
@@ -142,6 +145,7 @@ $app->group('/api/private', function (RouteCollectorProxy $group) {
     // Board routes
     $group->get('/boards', GetUserBoardsController::class);
     $group->post('/boards', CreateBoardController::class);
+    $group->get('/boards/{id}/tasks', GetBoardTasksController::class);
     $group->patch('/boards/{id}', UpdateBoardController::class);
     $group->delete('/boards/{id}', DeleteBoardController::class);
     $group->post('/boards/{id}/users', AddUserToBoardController::class);

@@ -92,6 +92,20 @@ final class PostgresTaskRepository implements TaskRepository
         return $tasks;
     }
 
+    #[Override]
+    public function findByBoardId(string $board_id): array
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM tasks WHERE board_id = :board_id AND deleted_at IS NULL ORDER BY created_at DESC');
+        $stmt->execute([':board_id' => $board_id]);
+
+        $tasks = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $tasks[] = $this->hydrate($row);
+        }
+
+        return $tasks;
+    }
+
     /**
      * Hydrate a Task entity from a database row.
      * 

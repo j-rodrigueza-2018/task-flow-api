@@ -43,4 +43,13 @@ interface TaskRepository
      * @return Task[] An array of all the user's tasks.
      */
     public function findByUserId(string $user_id): array;
+
+    /**
+     * Finds all the tasks belonging to a specific board.
+     * 
+     * @param string $board_id The ID of the board.
+     * 
+     * @return Task[] An array of all the board tasks.
+     */
+    public function findByBoardId(string $board_id): array;
 }
