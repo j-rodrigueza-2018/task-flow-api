@@ -5,12 +5,14 @@ use App\Application\UseCase\Board\CreateBoardUseCase;
 use App\Application\UseCase\Board\DeleteBoardUseCase;
 use App\Application\UseCase\Board\DeleteUserFromBoardUseCase;
 use App\Application\UseCase\Board\GetBoardTasksUseCase;
+use App\Application\UseCase\Board\GetBoardUseCase;
 use App\Application\UseCase\Board\GetUserBoardsUseCase;
 use App\Application\UseCase\Board\UpdateBoardUseCase;
 use App\Application\UseCase\Task\AddUserToTaskUseCase;
 use App\Application\UseCase\Task\CreateTaskUseCase;
 use App\Application\UseCase\Task\DeleteTaskUseCase;
 use App\Application\UseCase\Task\DeleteUserFromTaskUseCase;
+use App\Application\UseCase\Task\GetTaskUseCase;
 use App\Application\UseCase\Task\GetUserTasksUseCase;
 use App\Application\UseCase\Task\UpdateTaskUseCase;
 use App\Application\UseCase\User\LoginUserUseCase;
@@ -23,6 +25,7 @@ use App\Infrastructure\Http\Controller\Board\AddUserToBoardController;
 use App\Infrastructure\Http\Controller\Board\CreateBoardController;
 use App\Infrastructure\Http\Controller\Board\DeleteBoardController;
 use App\Infrastructure\Http\Controller\Board\DeleteUserFromBoardController;
+use App\Infrastructure\Http\Controller\Board\GetBoardController;
 use App\Infrastructure\Http\Controller\Board\GetBoardTasksController;
 use App\Infrastructure\Http\Controller\Board\GetUserBoardsController;
 use App\Infrastructure\Http\Controller\Board\UpdateBoardController;
@@ -30,6 +33,7 @@ use App\Infrastructure\Http\Controller\Task\AddUserToTaskController;
 use App\Infrastructure\Http\Controller\Task\CreateTaskController;
 use App\Infrastructure\Http\Controller\Task\DeleteTaskController;
 use App\Infrastructure\Http\Controller\Task\DeleteUserFromTaskController;
+use App\Infrastructure\Http\Controller\Task\GetTaskController;
 use App\Infrastructure\Http\Controller\Task\GetUserTasksController;
 use App\Infrastructure\Http\Controller\User\LoginUserController;
 use App\Infrastructure\Http\Controller\User\RegisterUserController;
@@ -80,6 +84,7 @@ $container_builder->addDefinitions([
     GetUserTasksUseCase::class => autowire(),
     UpdateTaskUseCase::class => autowire(),
     DeleteTaskUseCase::class => autowire(),
+    GetTaskUseCase::class => autowire(),
 
     TaskUserRepository::class => autowire(PostgresTaskUserRepository::class),
     AddUserToTaskUseCase::class => autowire(),
@@ -91,6 +96,7 @@ $container_builder->addDefinitions([
     DeleteBoardUseCase::class => autowire(),
     GetUserBoardsUseCase::class => autowire(),
     GetBoardTasksUseCase::class => autowire(),
+    GetBoardUseCase::class => autowire(),
 
     BoardUserRepository::class => autowire(PostgresBoardUserRepository::class),
     AddUserToBoardUseCase::class => autowire(),
@@ -143,6 +149,7 @@ $app->group('/api/private', function (RouteCollectorProxy $group) {
     });
 
     // Board routes
+    $group->get('/boards/{id}', GetBoardController::class);
     $group->get('/boards', GetUserBoardsController::class);
     $group->post('/boards', CreateBoardController::class);
     $group->get('/boards/{id}/tasks', GetBoardTasksController::class);
@@ -152,6 +159,7 @@ $app->group('/api/private', function (RouteCollectorProxy $group) {
     $group->delete('/boards/{id}/users/{user_id}', DeleteUserFromBoardController::class);
 
     // Task routes
+    $group->get('/tasks/{id}', GetTaskController::class);
     $group->post('/tasks', CreateTaskController::class);
     $group->get('/tasks', GetUserTasksController::class);
     $group->patch('/tasks/{id}', UpdateTaskController::class);
