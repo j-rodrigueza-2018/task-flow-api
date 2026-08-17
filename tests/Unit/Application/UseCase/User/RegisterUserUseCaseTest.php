@@ -26,25 +26,25 @@ final class RegisterUserUseCaseTest extends TestCase
         $this->use_case = new RegisterUserUseCase($this->user_repository_mock);
     }
 
-    public function test_it_throws_exception_if_password_is_too_short(): void
+    public function testItThrowsExceptionIfPasswordIsTooShort(): void
     {
         try {
             $this->use_case->execute('nickname', 'test@example.com', 'short');
             $this->fail('Expected InvalidArgumentException was not thrown.');
-        } catch (InvalidArgumentException $e) {
-            $this->assertEquals('The password must be at least 8 characters long.', $e->getMessage());
+        } catch (InvalidArgumentException $exception) {
+            $this->assertEquals('The password must be at least 8 characters long.', $exception->getMessage());
         }
     }
 
-    public function test_it_throws_exception_if_email_already_exists(): void
+    public function testItThrowsExceptionIfEmailAlreadyExists(): void
     {
         $dummy_user = new User(
-            uuid_create(UUID_TYPE_RANDOM),
-            'nickname',
-            'test@example.com',
-            'hash_password',
-            new \DateTimeImmutable(),
-            new \DateTimeImmutable()
+            id: uuid_create(UUID_TYPE_RANDOM),
+            nickname: 'nickname',
+            email: 'test@example.com',
+            password_hash: 'hash_password',
+            created_at: new \DateTimeImmutable(),
+            updated_at: new \DateTimeImmutable()
         );
 
         $this->user_repository_mock
@@ -56,12 +56,12 @@ final class RegisterUserUseCaseTest extends TestCase
         try {
             $this->use_case->execute('nickname', 'test@example.com', 'password123');
             $this->fail('Expected InvalidArgumentException was not thrown.');
-        } catch (InvalidArgumentException $e) {
-            $this->assertEquals('A user with this email already exists.', $e->getMessage());
+        } catch (InvalidArgumentException $exception) {
+            $this->assertEquals('A user with this email already exists.', $exception->getMessage());
         }
     }
 
-    public function test_it_registers_a_user_successfully(): void
+    public function testItRegistersAUserSuccessfully(): void
     {
         $this->user_repository_mock
             ->expects($this->once())
