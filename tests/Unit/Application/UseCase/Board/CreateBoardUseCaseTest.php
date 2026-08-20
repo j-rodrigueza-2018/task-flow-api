@@ -38,8 +38,8 @@ final class CreateBoardUseCaseTest extends TestCase
             ->with(
                 $this->callback(
                     function (Board $board) use ($board_name, $board_description) {
-                        return $board->getName() === $board_name &&
-                            $board->getDescription() === $board_description;
+                        return $board->getName() === $board_name
+                            && $board->getDescription() === $board_description;
                     }
                 )
             );
@@ -51,8 +51,8 @@ final class CreateBoardUseCaseTest extends TestCase
             ->with(
                 $this->callback(
                     function (BoardUser $board_user) use ($user_id) {
-                        return $board_user->getUserId() === $user_id &&
-                            $board_user->getRole() === BoardRole::OWNER;
+                        return $board_user->getUserId() === $user_id
+                            && $board_user->getRole() === BoardRole::OWNER;
                     }
                 )
             );
