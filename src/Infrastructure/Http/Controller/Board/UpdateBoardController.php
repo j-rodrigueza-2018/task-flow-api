@@ -19,9 +19,12 @@ final class UpdateBoardController
     public function __invoke(Request $request, Response $response, array $args)
     {
         try {
+            $jwt_payload = $request->getAttribute('jwt_payload');
             $request_data = (array) $request->getParsedBody();
+
             $board = $this->use_case->execute(
                 board_id: $args['id'],
+                user_id: $jwt_payload->sub,
                 name: array_key_exists('name', $request_data) ? strval($request_data['name']) : null,
                 description: array_key_exists('description', $request_data) ? strval($request_data['description']) : null
             );
