@@ -19,7 +19,12 @@ final class DeleteBoardController
     public function __invoke(Request $request, Response $response, array $args): Response
     {
         try {
-            $this->use_case->execute($args['id']);
+            $jwt_payload = $request->getAttribute('jwt_payload');
+
+            $this->use_case->execute(
+                board_id: $args['id'],
+                user_id: $jwt_payload->sub
+            );
 
             $payload = json_encode([
                 'status' => 'success',
