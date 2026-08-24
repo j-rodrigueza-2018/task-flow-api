@@ -6,23 +6,27 @@ namespace App\Application\UseCase\Task;
 
 use App\Domain\Entity\Task;
 use App\Domain\Entity\TaskUser;
+use App\Domain\Repository\BoardUserRepository;
 use App\Domain\Repository\TaskRepository;
 use App\Domain\Repository\TaskUserRepository;
 use DateTimeImmutable;
+use InvalidArgumentException;
 
 final class CreateTaskUseCase
 {
     public function __construct(
         private readonly TaskRepository $task_repository,
-        private readonly TaskUserRepository $task_user_repository
+        private readonly TaskUserRepository $task_user_repository,
+        private readonly BoardUserRepository $board_user_repository
     ) {}
 
-    public function execute(
-        string $user_id,
-        string $board_id,
-        string $title,
-        ?string $description = null
-    ): Task {
+    public function execute(string $user_id, string $board_id, string $title, ?string $description = null): Task
+    {
+        $board_user = $this->board_user_repository->findByBoardAndUser($board_id, $user_id);
+        if (!$board_user) {
+            throw new InvalidArgumentException('User does not have permission to create tasks in this board.');
+        }
+        
         $task = new Task(
             id: uuid_create(UUID_TYPE_RANDOM),
             title: $title,
