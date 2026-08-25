@@ -19,6 +19,7 @@ final class AddUserToTaskController
     public function __invoke(Request $request, Response $response, array $args): Response
     {
         try {
+            $jwt_payload = $request->getAttribute('jwt_payload');
             $request_data = (array) $request->getParsedBody();
 
             if (!array_key_exists('user_id', $request_data) || empty($request_data['user_id'])) {
@@ -27,7 +28,8 @@ final class AddUserToTaskController
 
             $task_user = $this->use_case->execute(
                 task_id: $args['id'],
-                user_id: strval($request_data['user_id'])
+                user_id: strval($request_data['user_id']),
+                requester_id: $jwt_payload->sub
             );
 
             $payload = json_encode([

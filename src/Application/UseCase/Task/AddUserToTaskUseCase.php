@@ -19,7 +19,7 @@ final class AddUserToTaskUseCase
         private readonly BoardUserRepository $board_user_repository
     ) {}
 
-    public function execute(string $task_id, string $user_id): TaskUser
+    public function execute(string $task_id, string $user_id, string $requester_id): TaskUser
     {
         if (empty($task_id)) {
             throw new InvalidArgumentException('The task_id cannot be empty.');
@@ -29,9 +29,18 @@ final class AddUserToTaskUseCase
             throw new InvalidArgumentException('The user_id cannot be empty.');
         }
 
+        if (empty($requester_id)) {
+            throw new InvalidArgumentException('The requester_id cannot be empty.');
+        }
+
         $task = $this->task_repository->findById($task_id);
         if (!$task) {
             throw new InvalidArgumentException('The task does not exist.');
+        }
+
+        $requester_member = $this->board_user_repository->findByBoardAndUser($task->getBoardId(), $requester_id);
+        if (!$requester_member) {
+            throw new InvalidArgumentException('You do not have permission to assign users to this task.');
         }
 
         $board_member = $this->board_user_repository->findByBoardAndUser($task->getBoardId(), $user_id);
