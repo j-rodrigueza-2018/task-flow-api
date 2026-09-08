@@ -86,7 +86,7 @@ final class Board
             throw new InvalidArgumentException('The name cannot be empty.');
         }
 
-        if (strlen($name) < 10 || strlen($name) > 255) {
+        if (mb_strlen($name) < 10 || mb_strlen($name) > 255) {
             throw new InvalidArgumentException('The name must be between 10 and 255 characters long.');
         }
     }

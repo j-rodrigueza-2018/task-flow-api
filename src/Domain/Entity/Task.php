@@ -126,7 +126,7 @@ final class Task
             throw new InvalidArgumentException('The title cannot be empty.');
         }
 
-        if (strlen($title) < 3 || strlen($title) > 255) {
+        if (mb_strlen($title) < 3 || mb_strlen($title) > 255) {
             throw new InvalidArgumentException('The title must be between 3 and 255 characters long.');
         }
     }

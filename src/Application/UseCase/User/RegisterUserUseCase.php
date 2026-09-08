@@ -16,7 +16,7 @@ final class RegisterUserUseCase
 
     public function execute(string $nickname, string $email, string $password): void
     {
-        if (strlen($password) < 8) {
+        if (mb_strlen($password) < 8) {
             throw new InvalidArgumentException('The password must be at least 8 characters long.');
         }
 

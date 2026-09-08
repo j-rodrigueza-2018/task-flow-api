@@ -28,8 +28,12 @@ final class RegisterUserUseCaseTest extends TestCase
 
     public function testItThrowsExceptionIfPasswordIsTooShort(): void
     {
+        $this->user_repository_mock
+            ->expects($this->never())
+            ->method('findByEmail');
+
         try {
-            $this->use_case->execute('nickname', 'test@example.com', 'short');
+            $this->use_case->execute('nickname', 'test@example.com', 'peña123');
             $this->fail('Expected InvalidArgumentException was not thrown.');
         } catch (InvalidArgumentException $exception) {
             $this->assertEquals('The password must be at least 8 characters long.', $exception->getMessage());

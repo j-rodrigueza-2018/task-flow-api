@@ -18,7 +18,7 @@ final class User
             throw new \InvalidArgumentException('The nickname cannot be empty.');
         }
 
-        if (strlen($nickname) < 4 || strlen($nickname) > 20) {
+        if (mb_strlen($nickname) < 4 || mb_strlen($nickname) > 20) {
             throw new \InvalidArgumentException('The nickname must be between 4 and 20 characters long.');
         }
 
