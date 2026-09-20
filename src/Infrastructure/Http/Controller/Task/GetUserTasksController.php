@@ -7,6 +7,7 @@ namespace App\Infrastructure\Http\Controller\Task;
 use App\Application\UseCase\Task\GetUserTasksUseCase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use OpenApi\Attributes as OA;
 use Throwable;
 
 final class GetUserTasksController
@@ -15,6 +16,21 @@ final class GetUserTasksController
         private readonly GetUserTasksUseCase $use_case
     ) {}
 
+    #[OA\Get(
+        path: '/api/private/tasks',
+        summary: 'Get user tasks',
+        description: 'Retrieve all tasks for a specific user',
+        tags: ['Tasks'],
+        security: [['bearerAuth' => []]],
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Successful response',
+    )]
+    #[OA\Response(
+        response: 500,
+        description: 'Internal server error',
+    )]
     public function __invoke(Request $request, Response $response): Response
     {
         try {

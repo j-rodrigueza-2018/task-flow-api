@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+  title: 'Task Flow API'
+  description: 'API for managing tasks in the Task Flow application.'
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost:8000'
+    description: 'Local Development Server'
+paths:
+  /api/private/tasks:
+    get:
+      tags:
+        - Tasks
+      summary: 'Get user tasks'
+      description: 'Retrieve all tasks for a specific user'
+      operationId: 0d91a7150581169e4729a8a62dae8312
+      responses:
+        '200':
+          description: 'Successful response'
+        '500':
+          description: 'Internal server error'
+      security:
+        -
+          bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      bearerFormat: JWT
+      scheme: bearer
+tags:
+  -
+    name: Tasks
+    description: Tasks

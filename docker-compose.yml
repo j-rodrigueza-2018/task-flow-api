@@ -47,6 +47,18 @@ services:
     networks:
       - taskflow-net
 
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: task_flow_swagger
+    ports:
+      - "8080:8080"
+    environment:
+      SWAGGER_JSON: /openapi.yaml
+    volumes:
+      - ./public/openapi.yaml:/openapi.yaml
+    networks:
+      - taskflow-net
+
 # Volume declared for PostgreSQL data persistence
 volumes:
   postgres_data:

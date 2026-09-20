@@ -9,6 +9,7 @@ use App\Domain\Repository\TaskRepository;
 use App\Domain\Repository\TaskUserRepository;
 use App\Domain\Repository\UserRepository;
 use App\Infrastructure\Http\Middleware\AuthMiddleware;
+use App\Infrastructure\Http\Middleware\CorsMiddleware;
 use App\Infrastructure\Persistence\PostgresBoardRepository;
 use App\Infrastructure\Persistence\PostgresBoardUserRepository;
 use App\Infrastructure\Persistence\PostgresTaskRepository;
@@ -43,6 +44,11 @@ return [
     AuthMiddleware::class => autowire()->constructorParameter(
         'jwt_secret',
         getenv('JWT_SECRET')
+    ),
+
+    CorsMiddleware::class => autowire()->constructorParameter(
+        'allowed_origins',
+        ['http://localhost:8080']
     ),
 
     LoginUserUseCase::class => autowire()->constructorParameter(

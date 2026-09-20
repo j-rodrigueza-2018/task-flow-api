@@ -18,6 +18,7 @@ use App\Infrastructure\Http\Controller\User\LoginUserController;
 use App\Infrastructure\Http\Controller\User\RegisterUserController;
 use App\Infrastructure\Http\Controller\Task\UpdateTaskController;
 use App\Infrastructure\Http\Middleware\AuthMiddleware;
+use App\Infrastructure\Http\Middleware\CorsMiddleware;
 use DI\ContainerBuilder;
 use Slim\Factory\AppFactory;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -40,6 +41,13 @@ $app = AppFactory::create();
 $app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();
 $app->addErrorMiddleware(true, true, true);
+
+// Get the preflight petitions for CORS
+$app->options('/{routes:.+}', function (Request $request, Response $response) {
+    return $response;
+});
+
+$app->add($container->get(CorsMiddleware::class));
 
 // 4. Routes
 $app->post('/api/users', RegisterUserController::class);
