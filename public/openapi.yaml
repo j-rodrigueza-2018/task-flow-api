@@ -8,6 +8,61 @@ servers:
     url: 'http://localhost:8000'
     description: 'Local Development Server'
 paths:
+  '/api/private/tasks/{id}/users':
+    post:
+      tags:
+        - Tasks
+      summary: 'Add a user to a task'
+      description: 'Assigns a specific user to an existing task by their ID'
+      operationId: 29eea6eb50b0cebd5056e7f99d019a03
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'The unique identifier of the task'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - user_id
+              properties:
+                user_id:
+                  description: 'ID of the user to add to the task'
+                  type: string
+                  format: uuid
+                  example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              type: object
+      responses:
+        '201':
+          description: 'User added to task successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'User added to task successfully.' }
+                  data: { $ref: '#/components/schemas/TaskUser' }
+                type: object
+        '400':
+          description: 'Bad request (e.g., missing user_id)'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'Field "user_id" is required.' }
+                type: object
+        '500':
+          description: 'Internal server error'
+      security:
+        -
+          bearerAuth: []
   '/api/private/tasks/{id}':
     get:
       tags:
@@ -120,6 +175,30 @@ components:
           format: date-time
           example: '2024-06-03T10:15:00Z'
           nullable: true
+      type: object
+    TaskUser:
+      description: 'Represents the association between a task and a user.'
+      properties:
+        id:
+          description: 'Unique identifier for the task-user association.'
+          type: string
+          format: uuid
+          example: f3918a3d-5c74-4b92-8f1e-3a8c7b6d5e4f
+        task_id:
+          description: 'Unique identifier of the associated task.'
+          type: string
+          format: uuid
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        user_id:
+          description: 'Unique identifier of the associated user.'
+          type: string
+          format: uuid
+          example: b1c2d3e4-f5g6-7890-hijk-lm1234567890
+        created_at:
+          description: 'Timestamp when the association was created.'
+          type: string
+          format: date-time
+          example: '2024-06-01T12:00:00Z'
       type: object
   securitySchemes:
     bearerAuth:
