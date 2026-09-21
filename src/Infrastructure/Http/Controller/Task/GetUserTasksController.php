@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Http\Controller\Task;
 
 use App\Application\UseCase\Task\GetUserTasksUseCase;
+use App\Domain\Entity\Task;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use OpenApi\Attributes as OA;
@@ -26,6 +27,17 @@ final class GetUserTasksController
     #[OA\Response(
         response: 200,
         description: 'Successful response',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'status', type: 'string', example: 'success'),
+                new OA\Property(property: 'message', type: 'string', example: 'User tasks retrieved successfully.'),
+                new OA\Property(
+                    property: 'data',
+                    type: 'array',
+                    items: new OA\Items(ref: Task::class) // <-- Aquí referenciamos tu Entidad
+                )
+            ]
+        )
     )]
     #[OA\Response(
         response: 500,

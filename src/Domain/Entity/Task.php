@@ -7,7 +7,12 @@ namespace App\Domain\Entity;
 use DateTimeImmutable;
 use DomainException;
 use InvalidArgumentException;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    title: 'Task',
+    description: 'Represents a task in the system.',
+)]
 final class Task
 {
     public const STATUS_PENDING = 'pending';
@@ -21,13 +26,59 @@ final class Task
     ];
 
     public function __construct(
+        #[OA\Property(
+            description: 'The unique identifier of the task.',
+            format: 'uuid',
+            example: 'cfca3139-dfff-49bf-a1df-8baa8e392d01'
+        )]
         private readonly string $id,
+
+        #[OA\Property(
+            description: 'The title of the task.',
+            example: 'Implement user authentication'
+        )]
         private string $title,
+
+        #[OA\Property(
+            description: 'The description of the task.',
+            example: 'Implement user authentication using JWT tokens.'
+        )]
         private ?string $description,
+
+        #[OA\Property(
+            description: 'The status of the task.',
+            enum: [self::STATUS_PENDING, self::STATUS_IN_PROGRESS, self::STATUS_COMPLETED],
+            example: self::STATUS_IN_PROGRESS
+        )]
         private string $status,
+
+        #[OA\Property(
+            description: 'The unique identifier of the board to which the task belongs.',
+            format: 'uuid',
+            example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+        )]
         private string $board_id,
+
+        #[OA\Property(
+            description: 'The timestamp when the task was created.',
+            format: 'date-time',
+            example: '2024-06-01T12:00:00Z'
+        )]
         private readonly DateTimeImmutable $created_at,
+
+        #[OA\Property(
+            description: 'The timestamp when the task was last updated.',
+            format: 'date-time',
+            example: '2024-06-02T15:30:00Z'
+        )]
         private DateTimeImmutable $updated_at,
+
+        #[OA\Property(
+            description: 'The timestamp when the task was deleted, if applicable.',
+            format: 'date-time',
+            example: '2024-06-03T10:15:00Z',
+            nullable: true
+        )]
         private ?DateTimeImmutable $deleted_at = null
     ) {
         $this->validateTitle($title);

@@ -8,6 +8,46 @@ servers:
     url: 'http://localhost:8000'
     description: 'Local Development Server'
 paths:
+  '/api/private/tasks/{id}':
+    get:
+      tags:
+        - Tasks
+      summary: 'Get a specific task'
+      description: 'Retrieve details of a specific task by its ID'
+      operationId: 7a75b0a96953955d60300c3d27385604
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'The unique identifier of the task'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Task retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  data: { $ref: '#/components/schemas/Task' }
+                type: object
+        '404':
+          description: 'Task not found or invalid ID'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'Task not found or unauthorized.' }
+                type: object
+        '500':
+          description: 'Internal server error'
+      security:
+        -
+          bearerAuth: []
   /api/private/tasks:
     get:
       tags:
@@ -18,12 +58,69 @@ paths:
       responses:
         '200':
           description: 'Successful response'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'User tasks retrieved successfully.' }
+                  data: { type: array, items: { $ref: '#/components/schemas/Task' } }
+                type: object
         '500':
           description: 'Internal server error'
       security:
         -
           bearerAuth: []
 components:
+  schemas:
+    Task:
+      title: Task
+      description: 'Represents a task in the system.'
+      properties:
+        id:
+          description: 'The unique identifier of the task.'
+          type: string
+          format: uuid
+          example: cfca3139-dfff-49bf-a1df-8baa8e392d01
+        title:
+          description: 'The title of the task.'
+          type: string
+          example: 'Implement user authentication'
+        description:
+          description: 'The description of the task.'
+          type: string
+          example: 'Implement user authentication using JWT tokens.'
+          nullable: true
+        status:
+          description: 'The status of the task.'
+          type: string
+          example: in_progress
+          enum:
+            - pending
+            - in_progress
+            - completed
+        board_id:
+          description: 'The unique identifier of the board to which the task belongs.'
+          type: string
+          format: uuid
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        created_at:
+          description: 'The timestamp when the task was created.'
+          type: string
+          format: date-time
+          example: '2024-06-01T12:00:00Z'
+        updated_at:
+          description: 'The timestamp when the task was last updated.'
+          type: string
+          format: date-time
+          example: '2024-06-02T15:30:00Z'
+        deleted_at:
+          description: 'The timestamp when the task was deleted, if applicable.'
+          type: string
+          format: date-time
+          example: '2024-06-03T10:15:00Z'
+          nullable: true
+      type: object
   securitySchemes:
     bearerAuth:
       type: http
