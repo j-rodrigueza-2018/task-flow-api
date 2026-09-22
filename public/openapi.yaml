@@ -12,14 +12,14 @@ paths:
     post:
       tags:
         - Tasks
-      summary: 'Add a user to a task'
-      description: 'Assigns a specific user to an existing task by their ID'
+      summary: 'Add a user to a task.'
+      description: 'Assigns a specific user to an existing task by their ID.'
       operationId: 29eea6eb50b0cebd5056e7f99d019a03
       parameters:
         -
           name: id
           in: path
-          description: 'The unique identifier of the task'
+          description: 'The unique identifier of the task.'
           required: true
           schema:
             type: string
@@ -33,7 +33,7 @@ paths:
                 - user_id
               properties:
                 user_id:
-                  description: 'ID of the user to add to the task'
+                  description: 'ID of the user to add to the task.'
                   type: string
                   format: uuid
                   example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
@@ -50,13 +50,91 @@ paths:
                   data: { $ref: '#/components/schemas/TaskUser' }
                 type: object
         '400':
-          description: 'Bad request (e.g., missing user_id)'
+          description: 'Bad request (e.g., missing user_id).'
           content:
             application/json:
               schema:
                 properties:
                   status: { type: string, example: error }
                   message: { type: string, example: 'Field "user_id" is required.' }
+                type: object
+        '500':
+          description: 'Internal server error.'
+      security:
+        -
+          bearerAuth: []
+  /api/private/tasks:
+    get:
+      tags:
+        - Tasks
+      summary: 'Get user tasks.'
+      description: 'Retrieve all tasks for a specific user.'
+      operationId: 0d91a7150581169e4729a8a62dae8312
+      responses:
+        '200':
+          description: 'Successful response.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'User tasks retrieved successfully.' }
+                  data: { type: array, items: { $ref: '#/components/schemas/Task' } }
+                type: object
+        '500':
+          description: 'Internal server error.'
+      security:
+        -
+          bearerAuth: []
+    post:
+      tags:
+        - Tasks
+      summary: 'Create a new task.'
+      description: 'Creates a new task and assigns it to a specific board.'
+      operationId: 80628b6a1c4c8f9fdb1ae451699f3622
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - board_id
+                - title
+              properties:
+                board_id:
+                  description: 'ID of the board where the task will be created.'
+                  type: string
+                  format: uuid
+                  example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                title:
+                  description: 'Title of the task.'
+                  type: string
+                  example: 'Configure database connection.'
+                description:
+                  description: 'Optional details for the task.'
+                  type: string
+                  example: 'Review the credentials in the .env file.'
+                  nullable: true
+              type: object
+      responses:
+        '201':
+          description: 'Task created successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'Task created successfully.' }
+                  data: { $ref: '#/components/schemas/Task' }
+                type: object
+        '400':
+          description: 'Bad request or validation error'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'The title cannot be empty.' }
                 type: object
         '500':
           description: 'Internal server error'
@@ -67,21 +145,21 @@ paths:
     get:
       tags:
         - Tasks
-      summary: 'Get a specific task'
-      description: 'Retrieve details of a specific task by its ID'
+      summary: 'Get a specific task.'
+      description: 'Retrieve details of a specific task by its ID.'
       operationId: 7a75b0a96953955d60300c3d27385604
       parameters:
         -
           name: id
           in: path
-          description: 'The unique identifier of the task'
+          description: 'The unique identifier of the task.'
           required: true
           schema:
             type: string
             format: uuid
       responses:
         '200':
-          description: 'Task retrieved successfully'
+          description: 'Task retrieved successfully.'
           content:
             application/json:
               schema:
@@ -90,7 +168,7 @@ paths:
                   data: { $ref: '#/components/schemas/Task' }
                 type: object
         '404':
-          description: 'Task not found or invalid ID'
+          description: 'Task not found or invalid ID.'
           content:
             application/json:
               schema:
@@ -99,30 +177,7 @@ paths:
                   message: { type: string, example: 'Task not found or unauthorized.' }
                 type: object
         '500':
-          description: 'Internal server error'
-      security:
-        -
-          bearerAuth: []
-  /api/private/tasks:
-    get:
-      tags:
-        - Tasks
-      summary: 'Get user tasks'
-      description: 'Retrieve all tasks for a specific user'
-      operationId: 0d91a7150581169e4729a8a62dae8312
-      responses:
-        '200':
-          description: 'Successful response'
-          content:
-            application/json:
-              schema:
-                properties:
-                  status: { type: string, example: success }
-                  message: { type: string, example: 'User tasks retrieved successfully.' }
-                  data: { type: array, items: { $ref: '#/components/schemas/Task' } }
-                type: object
-        '500':
-          description: 'Internal server error'
+          description: 'Internal server error.'
       security:
         -
           bearerAuth: []

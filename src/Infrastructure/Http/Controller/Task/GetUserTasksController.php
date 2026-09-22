@@ -19,14 +19,14 @@ final class GetUserTasksController
 
     #[OA\Get(
         path: '/api/private/tasks',
-        summary: 'Get user tasks',
-        description: 'Retrieve all tasks for a specific user',
+        summary: 'Get user tasks.',
+        description: 'Retrieve all tasks for a specific user.',
         tags: ['Tasks'],
         security: [['bearerAuth' => []]],
     )]
     #[OA\Response(
         response: 200,
-        description: 'Successful response',
+        description: 'Successful response.',
         content: new OA\JsonContent(
             properties: [
                 new OA\Property(property: 'status', type: 'string', example: 'success'),
@@ -34,14 +34,14 @@ final class GetUserTasksController
                 new OA\Property(
                     property: 'data',
                     type: 'array',
-                    items: new OA\Items(ref: Task::class) // <-- Aquí referenciamos tu Entidad
+                    items: new OA\Items(ref: Task::class)
                 )
             ]
         )
     )]
     #[OA\Response(
         response: 500,
-        description: 'Internal server error',
+        description: 'Internal server error.',
     )]
     public function __invoke(Request $request, Response $response): Response
     {

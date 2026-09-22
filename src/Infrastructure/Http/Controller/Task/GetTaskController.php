@@ -20,8 +20,8 @@ final class GetTaskController
 
     #[OA\Get(
         path: '/api/private/tasks/{id}',
-        summary: 'Get a specific task',
-        description: 'Retrieve details of a specific task by its ID',
+        summary: 'Get a specific task.',
+        description: 'Retrieve details of a specific task by its ID.',
         tags: ['Tasks'],
         security: [['bearerAuth' => []]]
     )]
@@ -29,12 +29,12 @@ final class GetTaskController
         name: 'id',
         in: 'path',
         required: true,
-        description: 'The unique identifier of the task',
+        description: 'The unique identifier of the task.',
         schema: new OA\Schema(type: 'string', format: 'uuid')
     )]
     #[OA\Response(
         response: 200,
-        description: 'Task retrieved successfully',
+        description: 'Task retrieved successfully.',
         content: new OA\JsonContent(
             properties: [
                 new OA\Property(property: 'status', type: 'string', example: 'success'),
@@ -44,7 +44,7 @@ final class GetTaskController
     )]
     #[OA\Response(
         response: 404,
-        description: 'Task not found or invalid ID',
+        description: 'Task not found or invalid ID.',
         content: new OA\JsonContent(
             properties: [
                 new OA\Property(property: 'status', type: 'string', example: 'error'),
@@ -54,7 +54,7 @@ final class GetTaskController
     )]
     #[OA\Response(
         response: 500,
-        description: 'Internal server error'
+        description: 'Internal server error.'
     )]
     public function __invoke(Request $request, Response $response, array $args): Response
     {
