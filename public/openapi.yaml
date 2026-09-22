@@ -181,6 +181,52 @@ paths:
       security:
         -
           bearerAuth: []
+    delete:
+      tags:
+        - Tasks
+      summary: 'Delete a task.'
+      description: 'Soft delete a specific task by its ID.'
+      operationId: 14c3bf12a0c5baea510c33651036dcbc
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'The unique identifier of the task.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Task deleted successfully.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'Task deleted successfully.' }
+                type: object
+        '400':
+          description: 'Bad request or validation error.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'The task is already deleted.' }
+                type: object
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'An unexpected error occurred while deleting the task.' }
+                type: object
+      security:
+        -
+          bearerAuth: []
 components:
   schemas:
     Task:

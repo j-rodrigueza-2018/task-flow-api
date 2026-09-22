@@ -15,14 +15,14 @@ final class DeleteTaskUseCase
         private readonly BoardUserRepository $board_user_repository
     ) {}
 
-    public function execute(string $task_id, string $user_id): void
+    public function execute(string $task_id, string $requester_id): void
     {
         if (empty($task_id)) {
             throw new InvalidArgumentException('The task_id cannot be empty.');
         }
 
-        if (empty($user_id)) {
-            throw new InvalidArgumentException('The user_id cannot be empty.');
+        if (empty($requester_id)) {
+            throw new InvalidArgumentException('The requester_id cannot be empty.');
         }
 
         $task = $this->task_repository->findById($task_id);
@@ -30,7 +30,7 @@ final class DeleteTaskUseCase
             throw new InvalidArgumentException('Task not found.');
         }
 
-        $board_user = $this->board_user_repository->findByBoardAndUser($task->getBoardId(), $user_id);
+        $board_user = $this->board_user_repository->findByBoardAndUser($task->getBoardId(), $requester_id);
         if (!$board_user) {
             throw new InvalidArgumentException('User does not have permission to delete this task.');
         }

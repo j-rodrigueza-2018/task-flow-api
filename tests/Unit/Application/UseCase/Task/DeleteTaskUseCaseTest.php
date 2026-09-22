@@ -66,14 +66,14 @@ final class DeleteTaskUseCaseTest extends TestCase
             $this->use_case->execute(uuid_create(UUID_TYPE_RANDOM), '');
             $this->fail('Expected InvalidArgumentException was not thrown.');
         } catch (InvalidArgumentException $exception) {
-            $this->assertEquals('The user_id cannot be empty.', $exception->getMessage());
+            $this->assertEquals('The requester_id cannot be empty.', $exception->getMessage());
         }
     }
 
     public function testItThrowsExceptionIfTaskIsNotFound(): void
     {
         $task_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
 
         $this->task_repository_mock
             ->expects($this->once())
@@ -86,7 +86,7 @@ final class DeleteTaskUseCaseTest extends TestCase
             ->method('findByBoardAndUser');
 
         try {
-            $this->use_case->execute($task_id, $user_id);
+            $this->use_case->execute($task_id, $requester_id);
             $this->fail('Expected InvalidArgumentException was not thrown.');
         } catch (InvalidArgumentException $exception) {
             $this->assertEquals('Task not found.', $exception->getMessage());
@@ -96,7 +96,7 @@ final class DeleteTaskUseCaseTest extends TestCase
     public function testItThrowsExceptionIfUserDoesNotHavePermission(): void
     {
         $task_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
         $board_id = uuid_create(UUID_TYPE_RANDOM);
 
         $dummy_task = new Task(
@@ -118,7 +118,7 @@ final class DeleteTaskUseCaseTest extends TestCase
         $this->board_user_repository_mock
             ->expects($this->once())
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
+            ->with($board_id, $requester_id)
             ->willReturn(null);
 
         $this->task_repository_mock
@@ -126,7 +126,7 @@ final class DeleteTaskUseCaseTest extends TestCase
             ->method('delete');
 
         try {
-            $this->use_case->execute($task_id, $user_id);
+            $this->use_case->execute($task_id, $requester_id);
             $this->fail('Expected InvalidArgumentException was not thrown.');
         } catch (InvalidArgumentException $exception) {
             $this->assertEquals('User does not have permission to delete this task.', $exception->getMessage());
@@ -136,7 +136,7 @@ final class DeleteTaskUseCaseTest extends TestCase
     public function testItDeletesTaskSuccessfully(): void
     {
         $task_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
         $board_id = uuid_create(UUID_TYPE_RANDOM);
 
         $dummy_task = new Task(
@@ -158,7 +158,7 @@ final class DeleteTaskUseCaseTest extends TestCase
         $dummy_board_user = new BoardUser(
             id: uuid_create(UUID_TYPE_RANDOM),
             board_id: $board_id,
-            user_id: $user_id,
+            user_id: $requester_id,
             role: BoardRole::MEMBER,
             created_at: new DateTimeImmutable(),
             updated_at: new DateTimeImmutable()
@@ -167,7 +167,7 @@ final class DeleteTaskUseCaseTest extends TestCase
         $this->board_user_repository_mock
             ->expects($this->once())
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
+            ->with($board_id, $requester_id)
             ->willReturn($dummy_board_user);
 
         $this->task_repository_mock
@@ -175,7 +175,7 @@ final class DeleteTaskUseCaseTest extends TestCase
             ->method('delete')
             ->with($this->identicalTo($dummy_task));
 
-        $this->use_case->execute($task_id, $user_id);
+        $this->use_case->execute($task_id, $requester_id);
 
         $this->assertTrue($dummy_task->isDeleted());
     }
