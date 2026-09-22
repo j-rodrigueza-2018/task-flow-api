@@ -227,6 +227,79 @@ paths:
       security:
         -
           bearerAuth: []
+    patch:
+      tags:
+        - Tasks
+      summary: 'Update an existing task.'
+      description: 'Update task properties such as title, description, status, or board assignment.'
+      operationId: 923b00a03499a636342297aa498594af
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'The unique identifier of the task.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                title:
+                  description: 'The new title for the task.'
+                  type: string
+                  example: 'Updated task title.'
+                description:
+                  description: 'The new description for the task.'
+                  type: string
+                  example: 'Updated description details.'
+                  nullable: true
+                status:
+                  description: 'The new status of the task.'
+                  type: string
+                  example: in_progress
+                  enum: [pending, in_progress, completed]
+                board_id:
+                  description: 'The ID of the new board to move the task to.'
+                  type: string
+                  format: uuid
+                  example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              type: object
+      responses:
+        '200':
+          description: 'Task updated successfully.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'Task updated successfully.' }
+                  data: { $ref: '#/components/schemas/Task' }
+                type: object
+        '400':
+          description: 'Bad request or validation error.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'The title must be between 3 and 255 characters long.' }
+                type: object
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'An error occurred while updating the task.' }
+                type: object
+      security:
+        -
+          bearerAuth: []
   '/api/private/tasks/{id}/users/{user_id}':
     delete:
       tags:
