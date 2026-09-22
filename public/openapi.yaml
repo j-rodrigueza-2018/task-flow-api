@@ -227,6 +227,61 @@ paths:
       security:
         -
           bearerAuth: []
+  '/api/private/tasks/{id}/users/{user_id}':
+    delete:
+      tags:
+        - Tasks
+      summary: 'Remove a user from a task.'
+      description: 'Removes the assignment of a specific user from a task.'
+      operationId: ba4d20809a3fa72894c5b8ba5ce18300
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'The unique identifier of the task.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+        -
+          name: user_id
+          in: path
+          description: 'The unique identifier of the user to remove.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'User removed from task successfully.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'User removed from the task successfully.' }
+                type: object
+        '400':
+          description: 'Bad request or validation error.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'The user is not related to this task.' }
+                type: object
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'An unexpected error occurred while deleting the user from the task.' }
+                type: object
+      security:
+        -
+          bearerAuth: []
 components:
   schemas:
     Task:
