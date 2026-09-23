@@ -357,6 +357,78 @@ paths:
           bearerAuth: []
 components:
   schemas:
+    Board:
+      description: 'Represents a board entity.'
+      properties:
+        id:
+          description: 'Unique identifier for the board.'
+          type: string
+          format: uuid
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        name:
+          description: 'Name of the board.'
+          type: string
+          example: 'Project Management Board'
+        description:
+          description: 'Optional description of the board.'
+          type: string
+          example: 'This board is used for managing project tasks and milestones.'
+          nullable: true
+        created_at:
+          description: 'The timestamp when the board was created.'
+          type: string
+          format: date-time
+          example: '2024-06-01T12:00:00Z'
+        updated_at:
+          description: 'The timestamp when the board was last updated.'
+          type: string
+          format: date-time
+          example: '2024-06-02T15:30:00Z'
+        deleted_at:
+          description: 'The timestamp when the board was deleted, if applicable.'
+          type: string
+          format: date-time
+          example: '2024-06-03T10:15:00Z'
+          nullable: true
+      type: object
+    BoardUser:
+      description: 'Represents the association and role of a user within a board.'
+      properties:
+        id:
+          description: 'Unique identifier for the board-user association.'
+          type: string
+          format: uuid
+          example: f3918a3d-5c74-4b92-8f1e-3a8c7b6d5e4f
+        board_id:
+          description: 'Unique identifier of the associated board.'
+          type: string
+          format: uuid
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        user_id:
+          description: 'Unique identifier of the associated user.'
+          type: string
+          format: uuid
+          example: b1c2d3e4-f5g6-7890-hijk-lm1234567890
+        role:
+          description: 'The role of the user within the board (e.g., MEMBER, ADMIN).'
+          type: string
+          example: member
+          enum:
+            - owner
+            - admin
+            - member
+            - viewer
+        created_at:
+          description: 'Timestamp when the association was created.'
+          type: string
+          format: date-time
+          example: '2024-06-01T12:00:00Z'
+        updated_at:
+          description: 'Timestamp when the association was last updated.'
+          type: string
+          format: date-time
+          example: '2024-06-02T15:30:00Z'
+      type: object
     Task:
       title: Task
       description: 'Represents a task in the system.'

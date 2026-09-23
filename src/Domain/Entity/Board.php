@@ -7,15 +7,67 @@ namespace App\Domain\Entity;
 use DateTimeImmutable;
 use DomainException;
 use InvalidArgumentException;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: 'Board',
+    description: 'Represents a board entity.'
+)]
 final class Board
 {
     public function __construct(
+        #[OA\Property(
+            property: 'id',
+            type: 'string',
+            format: 'uuid',
+            example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+            description: 'Unique identifier for the board.'
+        )]
         private readonly string $id,
+
+        #[OA\Property(
+            property: 'name',
+            type: 'string',
+            example: 'Project Management Board',
+            description: 'Name of the board.'
+        )]
         private string $name,
+
+        #[OA\Property(
+            property: 'description',
+            type: 'string',
+            nullable: true,
+            example: 'This board is used for managing project tasks and milestones.',
+            description: 'Optional description of the board.'
+        )]
         private ?string $description,
+
+        #[OA\Property(
+            property: 'created_at',
+            type: 'string',
+            format: 'date-time',
+            example: '2024-06-01T12:00:00Z',
+            description: 'The timestamp when the board was created.'
+        )]
         private DateTimeImmutable $created_at,
+
+        #[OA\Property(
+            property: 'updated_at',
+            type: 'string',
+            format: 'date-time',
+            example: '2024-06-02T15:30:00Z',
+            description: 'The timestamp when the board was last updated.'
+        )]
         private DateTimeImmutable $updated_at,
+
+        #[OA\Property(
+            property: 'deleted_at',
+            type: 'string',
+            format: 'date-time',
+            nullable: true,
+            example: '2024-06-03T10:15:00Z',
+            description: 'The timestamp when the board was deleted, if applicable.'
+        )]
         private ?DateTimeImmutable $deleted_at = null
     ) {
         $this->validateName($name);
