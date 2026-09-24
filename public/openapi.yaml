@@ -8,6 +8,56 @@ servers:
     url: 'http://localhost:8000'
     description: 'Local Development Server'
 paths:
+  /api/private/boards:
+    post:
+      tags:
+        - Boards
+      summary: 'Create a new board.'
+      description: 'Creates a new board and assigns the requester as its owner.'
+      operationId: 774634eed7ea6c0604e4157833157b9d
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+              properties:
+                name:
+                  description: 'The name of the board.'
+                  type: string
+                  example: 'Project Management Board'
+                description:
+                  description: 'Optional details for the board.'
+                  type: string
+                  example: 'This board is used for managing project tasks and milestones.'
+                  nullable: true
+              type: object
+      responses:
+        '201':
+          description: 'Board created successfully.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'Board created successfully.' }
+                  data: { $ref: '#/components/schemas/Board' }
+                type: object
+        '400':
+          description: 'Bad request or validation error.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'The name must be between 10 and 255 characters long.' }
+                type: object
+        '500':
+          description: 'Internal server error.'
+      security:
+        -
+          bearerAuth: []
   '/api/private/tasks/{id}/users':
     post:
       tags:
@@ -507,6 +557,9 @@ components:
       bearerFormat: JWT
       scheme: bearer
 tags:
+  -
+    name: Boards
+    description: Boards
   -
     name: Tasks
     description: Tasks
