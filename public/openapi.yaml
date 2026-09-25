@@ -58,6 +58,53 @@ paths:
       security:
         -
           bearerAuth: []
+  '/api/private/boards/{id}':
+    get:
+      tags:
+        - Boards
+      summary: 'Get a specific board.'
+      description: 'Retrieve the details of a specific board by its ID.'
+      operationId: 0b9b2eec2624f926be922e56ed192552
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'The unique identifier of the board.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Board retrieved successfully.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  data: { $ref: '#/components/schemas/Board' }
+                type: object
+        '404':
+          description: 'Board not found or access denied.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'Board not found.' }
+                type: object
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'An error occurred while retrieving the board.' }
+                type: object
+      security:
+        -
+          bearerAuth: []
   '/api/private/tasks/{id}/users':
     post:
       tags:
