@@ -19,11 +19,32 @@ final class AddUserToBoardUseCase
         private readonly BoardUserRepository $board_user_repository
     ) {}
 
-    public function execute(string $board_id, string $user_id, BoardRole $board_role): BoardUser
+    public function execute(string $board_id, string $user_id, BoardRole $board_role, string $requester_id): BoardUser
     {
+        if (empty($board_id)) {
+            throw new InvalidArgumentException('The board_id cannot be empty.');
+        }
+
+        if (empty($user_id)) {
+            throw new InvalidArgumentException('The user_id cannot be empty.');
+        }
+
+        if (empty($requester_id)) {
+            throw new InvalidArgumentException('The requester_id cannot be empty.');
+        }
+        
         $board = $this->board_repository->findById($board_id);
         if (!$board) {
             throw new InvalidArgumentException('Board not found.');
+        }
+
+        $requester_user = $this->board_user_repository->findByBoardAndUser($board_id, $requester_id);
+        if (!$requester_user) {
+            throw new InvalidArgumentException('Requester does not belong to this board.');
+        }
+
+        if (!in_array($requester_user->getRole(), [BoardRole::OWNER, BoardRole::ADMIN], true)) {
+            throw new DomainException('Requester does not have permission to add users to this board.');
         }
 
         $existing_member = $this->board_user_repository->findByBoardAndUser($board_id, $user_id);

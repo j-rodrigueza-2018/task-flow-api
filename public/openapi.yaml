@@ -8,6 +8,83 @@ servers:
     url: 'http://localhost:8000'
     description: 'Local Development Server'
 paths:
+  '/api/private/boards/{id}/users':
+    post:
+      tags:
+        - Boards
+      summary: 'Add a user to a board.'
+      description: 'Assigns a user to a specific board with a given role. Requires ADMIN or OWNER privileges.'
+      operationId: a8e5e434d48c80eaa7164d204b64717f
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'The unique identifier of the board.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - user_id
+                - role
+              properties:
+                user_id:
+                  description: 'The unique identifier of the user to add.'
+                  type: string
+                  format: uuid
+                  example: b1c2d3e4-f5g6-7890-hijk-lm1234567890
+                role:
+                  description: 'The role to assign to the user on the board.'
+                  type: string
+                  example: MEMBER
+                  enum: [owner, admin, member, viewer]
+              type: object
+      responses:
+        '201':
+          description: 'User added to board successfully.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'User added to board successfully.' }
+                  data: { $ref: '#/components/schemas/BoardUser' }
+                type: object
+        '400':
+          description: 'Bad request, missing fields, invalid role, or requester does not belong to the board.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'Field "user_id" is required.' }
+                type: object
+        '409':
+          description: 'Domain exception, such as the user already existing in the board or lacking permissions.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'Requester does not have permission to add users to this board.' }
+                type: object
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'An unexpected error occurred while adding the user to the board.' }
+                type: object
+      security:
+        -
+          bearerAuth: []
   /api/private/boards:
     post:
       tags:

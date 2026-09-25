@@ -35,9 +35,64 @@ final class AddUserToBoardUseCaseTest extends TestCase
         );
     }
 
+    public function testItThrowsExceptionIfBoardIdIsEmpty(): void
+    {
+        $this->board_repository_mock
+            ->expects($this->never())
+            ->method('findById');
+
+        $this->board_user_repository_mock
+            ->expects($this->never())
+            ->method('findByBoardAndUser');
+
+        try {
+            $this->use_case->execute('', uuid_create(UUID_TYPE_RANDOM), BoardRole::MEMBER, uuid_create(UUID_TYPE_RANDOM));
+            $this->fail('Expected InvalidArgumentException was not thrown.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertEquals('The board_id cannot be empty.', $exception->getMessage());
+        }
+    }
+
+    public function testItThrowsExceptionIfUserIdIsEmpty(): void
+    {
+        $this->board_repository_mock
+            ->expects($this->never())
+            ->method('findById');
+
+        $this->board_user_repository_mock
+            ->expects($this->never())
+            ->method('findByBoardAndUser');
+
+        try {
+            $this->use_case->execute(uuid_create(UUID_TYPE_RANDOM), '', BoardRole::MEMBER, uuid_create(UUID_TYPE_RANDOM));
+            $this->fail('Expected InvalidArgumentException was not thrown.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertEquals('The user_id cannot be empty.', $exception->getMessage());
+        }
+    }
+
+    public function testItThrowsExceptionIfRequesterIdIsEmpty(): void
+    {
+        $this->board_repository_mock
+            ->expects($this->never())
+            ->method('findById');
+
+        $this->board_user_repository_mock
+            ->expects($this->never())
+            ->method('findByBoardAndUser');
+
+        try {
+            $this->use_case->execute(uuid_create(UUID_TYPE_RANDOM), uuid_create(UUID_TYPE_RANDOM), BoardRole::MEMBER, '');
+            $this->fail('Expected InvalidArgumentException was not thrown.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertEquals('The requester_id cannot be empty.', $exception->getMessage());
+        }
+    }
+
     public function testItThrowsExceptionIfBoardIsNotFound(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
 
         $this->board_repository_mock
             ->expects($this->once())
@@ -50,16 +105,18 @@ final class AddUserToBoardUseCaseTest extends TestCase
             ->method('findByBoardAndUser');
 
         try {
-            $this->use_case->execute($board_id, uuid_create(UUID_TYPE_RANDOM), BoardRole::MEMBER);
+            $this->use_case->execute($board_id, uuid_create(UUID_TYPE_RANDOM), BoardRole::MEMBER, $requester_id);
             $this->fail('Expected InvalidArgumentException was not thrown.');
         } catch (InvalidArgumentException $exception) {
             $this->assertEquals('Board not found.', $exception->getMessage());
         }
     }
 
-    public function testItThrowsExceptionIfUserIsAlreadyMember(): void
+    public function testItThrowsExceptionIfRequesterDoesNotBelongToBoard(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
+
         $dummy_board = new Board(
             id: $board_id,
             name: 'Test Board',
@@ -74,8 +131,92 @@ final class AddUserToBoardUseCaseTest extends TestCase
             ->with($board_id)
             ->willReturn($dummy_board);
 
+        $this->board_user_repository_mock
+            ->expects($this->once())
+            ->method('findByBoardAndUser')
+            ->with($board_id, $requester_id)
+            ->willReturn(null);
+
+        try {
+            $this->use_case->execute($board_id, uuid_create(UUID_TYPE_RANDOM), BoardRole::MEMBER, $requester_id);
+            $this->fail('Expected InvalidArgumentException was not thrown.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertEquals('Requester does not belong to this board.', $exception->getMessage());
+        }
+    }
+
+    public function testItThrowsExceptionIfRequesterDoesNotHavePermission(): void
+    {
+        $board_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
+
+        $dummy_board = new Board(
+            id: $board_id,
+            name: 'Test Board',
+            description: null,
+            created_at: new DateTimeImmutable(),
+            updated_at: new DateTimeImmutable()
+        );
+
+        $this->board_repository_mock
+            ->expects($this->once())
+            ->method('findById')
+            ->with($board_id)
+            ->willReturn($dummy_board);
+
+        $dummy_requester_board_user = new BoardUser(
+            id: uuid_create(UUID_TYPE_RANDOM),
+            board_id: $board_id,
+            user_id: $requester_id,
+            role: BoardRole::MEMBER,
+            created_at: new DateTimeImmutable(),
+            updated_at: new DateTimeImmutable()
+        );
+
+        $this->board_user_repository_mock
+            ->expects($this->once())
+            ->method('findByBoardAndUser')
+            ->with($board_id, $requester_id)
+            ->willReturn($dummy_requester_board_user);
+
+        try {
+            $this->use_case->execute($board_id, uuid_create(UUID_TYPE_RANDOM), BoardRole::MEMBER, $requester_id);
+            $this->fail('Expected DomainException was not thrown.');
+        } catch (DomainException $exception) {
+            $this->assertEquals('Requester does not have permission to add users to this board.', $exception->getMessage());
+        }
+    }
+
+    public function testItThrowsExceptionIfUserIsAlreadyMember(): void
+    {
+        $board_id = uuid_create(UUID_TYPE_RANDOM);
         $user_id = uuid_create(UUID_TYPE_RANDOM);
-        $dummy_board_user = new BoardUser(
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
+
+        $dummy_board = new Board(
+            id: $board_id,
+            name: 'Test Board',
+            description: null,
+            created_at: new DateTimeImmutable(),
+            updated_at: new DateTimeImmutable()
+        );
+
+        $this->board_repository_mock
+            ->expects($this->once())
+            ->method('findById')
+            ->with($board_id)
+            ->willReturn($dummy_board);
+
+        $dummy_requester_board_user = new BoardUser(
+            id: uuid_create(UUID_TYPE_RANDOM),
+            board_id: $board_id,
+            user_id: $requester_id,
+            role: BoardRole::OWNER, // Rol con permisos
+            created_at: new DateTimeImmutable(),
+            updated_at: new DateTimeImmutable()
+        );
+
+        $dummy_existing_board_user = new BoardUser(
             id: uuid_create(UUID_TYPE_RANDOM),
             board_id: $board_id,
             user_id: $user_id,
@@ -85,13 +226,18 @@ final class AddUserToBoardUseCaseTest extends TestCase
         );
 
         $this->board_user_repository_mock
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
-            ->willReturn($dummy_board_user);
+            ->willReturnCallback(function (string $b_id, string $u_id) use ($requester_id, $user_id, $dummy_requester_board_user, $dummy_existing_board_user) {
+                return match ($u_id) {
+                    $requester_id => $dummy_requester_board_user,
+                    $user_id => $dummy_existing_board_user,
+                    default => null,
+                };
+            });
 
         try {
-            $this->use_case->execute($board_id, $user_id, BoardRole::MEMBER);
+            $this->use_case->execute($board_id, $user_id, BoardRole::MEMBER, $requester_id);
             $this->fail('Expected DomainException was not thrown.');
         } catch (DomainException $exception) {
             $this->assertEquals('The user is already a member of this board.', $exception->getMessage());
@@ -102,6 +248,7 @@ final class AddUserToBoardUseCaseTest extends TestCase
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
         $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
 
         $dummy_board = new Board(
             id: $board_id,
@@ -117,11 +264,25 @@ final class AddUserToBoardUseCaseTest extends TestCase
             ->with($board_id)
             ->willReturn($dummy_board);
 
+        $dummy_requester_board_user = new BoardUser(
+            id: uuid_create(UUID_TYPE_RANDOM),
+            board_id: $board_id,
+            user_id: $requester_id,
+            role: BoardRole::ADMIN,
+            created_at: new DateTimeImmutable(),
+            updated_at: new DateTimeImmutable()
+        );
+
         $this->board_user_repository_mock
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
-            ->willReturn(null);
+            ->willReturnCallback(function (string $b_id, string $u_id) use ($requester_id, $user_id, $dummy_requester_board_user) {
+                return match ($u_id) {
+                    $requester_id => $dummy_requester_board_user,
+                    $user_id => null,
+                    default => null,
+                };
+            });
 
         $this->board_user_repository_mock
             ->expects($this->once())
@@ -136,7 +297,7 @@ final class AddUserToBoardUseCaseTest extends TestCase
                 )
             );
 
-        $result = $this->use_case->execute($board_id, $user_id, BoardRole::MEMBER);
+        $result = $this->use_case->execute($board_id, $user_id, BoardRole::MEMBER, $requester_id);
 
         $this->assertInstanceOf(BoardUser::class, $result);
         $this->assertEquals($board_id, $result->getBoardId());
