@@ -31,10 +31,54 @@ final class DeleteBoardUseCaseTest extends TestCase
         $this->use_case = new DeleteBoardUseCase($this->board_repository_mock, $this->board_user_repository_mock);
     }
 
+    public function testItThrowsExceptionIfBoardIdIsEmpty(): void
+    {
+        $this->board_repository_mock
+            ->expects($this->never())
+            ->method('findById');
+
+        $this->board_user_repository_mock
+            ->expects($this->never())
+            ->method('findByBoardAndUser');
+
+        $this->board_repository_mock
+            ->expects($this->never())
+            ->method('delete');
+
+        try {
+            $this->use_case->execute('', uuid_create(UUID_TYPE_RANDOM));
+            $this->fail('Expected InvalidArgumentException was not thrown.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertEquals('The board_id cannot be empty.', $exception->getMessage());
+        }
+    }
+
+    public function testItThrowsExceptionIfRequesterIdIsEmpty(): void
+    {
+        $this->board_repository_mock
+            ->expects($this->never())
+            ->method('findById');
+
+        $this->board_user_repository_mock
+            ->expects($this->never())
+            ->method('findByBoardAndUser');
+            
+        $this->board_repository_mock
+            ->expects($this->never())
+            ->method('delete');
+
+        try {
+            $this->use_case->execute(uuid_create(UUID_TYPE_RANDOM), '');
+            $this->fail('Expected InvalidArgumentException was not thrown.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertEquals('The requester_id cannot be empty.', $exception->getMessage());
+        }
+    }
+
     public function testItThrowsExceptionIfBoardIsNotFound(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
 
         $this->board_repository_mock
             ->expects($this->once())
@@ -51,7 +95,7 @@ final class DeleteBoardUseCaseTest extends TestCase
             ->method('delete');
 
         try {
-            $this->use_case->execute($board_id, $user_id);
+            $this->use_case->execute($board_id, $requester_id);
             $this->fail('Expected InvalidArgumentException was not thrown.');
         } catch (InvalidArgumentException $exception) {
             $this->assertEquals('Board not found.', $exception->getMessage());
@@ -61,7 +105,7 @@ final class DeleteBoardUseCaseTest extends TestCase
     public function testItThrowsExceptionIfUserIsMemberButNotOwner(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
 
         $dummy_board = new Board(
             id: $board_id,
@@ -80,7 +124,7 @@ final class DeleteBoardUseCaseTest extends TestCase
         $dummy_board_user = new BoardUser(
             id: uuid_create(UUID_TYPE_RANDOM),
             board_id: $board_id,
-            user_id: $user_id,
+            user_id: $requester_id,
             role: BoardRole::MEMBER,
             created_at: new DateTimeImmutable(),
             updated_at: new DateTimeImmutable()
@@ -89,7 +133,7 @@ final class DeleteBoardUseCaseTest extends TestCase
         $this->board_user_repository_mock
             ->expects($this->once())
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
+            ->with($board_id, $requester_id)
             ->willReturn($dummy_board_user);
 
         $this->board_repository_mock
@@ -97,17 +141,17 @@ final class DeleteBoardUseCaseTest extends TestCase
             ->method('delete');
 
         try {
-            $this->use_case->execute($board_id, $user_id);
+            $this->use_case->execute($board_id, $requester_id);
             $this->fail('Expected InvalidArgumentException was not thrown.');
         } catch (InvalidArgumentException $exception) {
-            $this->assertEquals('User does not have permission to delete this board.', $exception->getMessage());
+            $this->assertEquals('Requester does not have permission to delete this board.', $exception->getMessage());
         }
     }
 
     public function testItThrowsExceptionIfUserDoesNotHavePermission(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
 
         $dummy_board = new Board(
             id: $board_id,
@@ -126,7 +170,7 @@ final class DeleteBoardUseCaseTest extends TestCase
         $this->board_user_repository_mock
             ->expects($this->once())
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
+            ->with($board_id, $requester_id)
             ->willReturn(null);
 
         $this->board_repository_mock
@@ -134,17 +178,17 @@ final class DeleteBoardUseCaseTest extends TestCase
             ->method('delete');
 
         try {
-            $this->use_case->execute($board_id, $user_id);
+            $this->use_case->execute($board_id, $requester_id);
             $this->fail('Expected InvalidArgumentException was not thrown.');
         } catch (InvalidArgumentException $exception) {
-            $this->assertEquals('User does not have permission to delete this board.', $exception->getMessage());
+            $this->assertEquals('Requester does not have permission to delete this board.', $exception->getMessage());
         }
     }
 
     public function testItThrowsExceptionIfBoardIsAlreadyDeleted(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
 
         $dummy_board = new Board(
             id: $board_id,
@@ -166,7 +210,7 @@ final class DeleteBoardUseCaseTest extends TestCase
         $dummy_board_user = new BoardUser(
             id: uuid_create(UUID_TYPE_RANDOM),
             board_id: $board_id,
-            user_id: $user_id,
+            user_id: $requester_id,
             role: BoardRole::OWNER,
             created_at: new DateTimeImmutable(),
             updated_at: new DateTimeImmutable()
@@ -175,7 +219,7 @@ final class DeleteBoardUseCaseTest extends TestCase
         $this->board_user_repository_mock
             ->expects($this->once())
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
+            ->with($board_id, $requester_id)
             ->willReturn($dummy_board_user);
 
         $this->board_repository_mock
@@ -183,7 +227,7 @@ final class DeleteBoardUseCaseTest extends TestCase
             ->method('delete');
 
         try {
-            $this->use_case->execute($board_id, $user_id);
+            $this->use_case->execute($board_id, $requester_id);
             $this->fail('Expected DomainException was not thrown.');
         } catch (DomainException $exception) {
             $this->assertEquals('The board is already deleted.', $exception->getMessage());
@@ -193,7 +237,7 @@ final class DeleteBoardUseCaseTest extends TestCase
     public function testItDeletesBoardSuccessfully(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
 
         $dummy_board = new Board(
             id: $board_id,
@@ -212,7 +256,7 @@ final class DeleteBoardUseCaseTest extends TestCase
         $dummy_board_user = new BoardUser(
             id: uuid_create(UUID_TYPE_RANDOM),
             board_id: $board_id,
-            user_id: $user_id,
+            user_id: $requester_id,
             role: BoardRole::OWNER,
             created_at: new DateTimeImmutable(),
             updated_at: new DateTimeImmutable()
@@ -221,7 +265,7 @@ final class DeleteBoardUseCaseTest extends TestCase
         $this->board_user_repository_mock
             ->expects($this->once())
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
+            ->with($board_id, $requester_id)
             ->willReturn($dummy_board_user);
 
         $this->board_repository_mock
@@ -229,6 +273,6 @@ final class DeleteBoardUseCaseTest extends TestCase
             ->method('delete')
             ->with($dummy_board);
 
-        $this->use_case->execute($board_id, $user_id);
+        $this->use_case->execute($board_id, $requester_id);
     }
 }

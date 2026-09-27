@@ -182,6 +182,61 @@ paths:
       security:
         -
           bearerAuth: []
+    delete:
+      tags:
+        - Boards
+      summary: 'Delete a specific board.'
+      description: 'Soft deletes a board. Requires OWNER privileges on the board.'
+      operationId: ad8b3c795a98d485a48f3a5b84d4678f
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'The unique identifier of the board to delete.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Board deleted successfully.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'Board deleted successfully.' }
+                type: object
+        '400':
+          description: 'Bad request or permission denied.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'Requester does not have permission to delete this board.' }
+                type: object
+        '409':
+          description: 'Conflict, board is already deleted.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'The board is already deleted.' }
+                type: object
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'An unexpected error occurred while deleting the board.' }
+                type: object
+      security:
+        -
+          bearerAuth: []
   '/api/private/tasks/{id}/users':
     post:
       tags:
