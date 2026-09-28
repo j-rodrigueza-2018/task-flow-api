@@ -237,6 +237,70 @@ paths:
       security:
         -
           bearerAuth: []
+  '/api/private/boards/{id}/users/{user_id}':
+    delete:
+      tags:
+        - Boards
+      summary: 'Remove a user from a board.'
+      description: 'Removes a user from a specific board. The requester must be an ADMIN or OWNER, or be removing themselves.'
+      operationId: 19efacfa551e8224ae849fea33bb7813
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'The unique identifier of the board.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+        -
+          name: user_id
+          in: path
+          description: 'The unique identifier of the user to remove.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'User removed from the board successfully.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'User deleted from the board successfully.' }
+                type: object
+        '403':
+          description: 'Permission denied.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'Only owners and admins can remove other members from the board.' }
+                type: object
+        '404':
+          description: 'Board, user, or membership not found.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'The user is not a member of this board.' }
+                type: object
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'An unexpected error occurred while deleting the user from the board.' }
+                type: object
+      security:
+        -
+          bearerAuth: []
   '/api/private/tasks/{id}/users':
     post:
       tags:
