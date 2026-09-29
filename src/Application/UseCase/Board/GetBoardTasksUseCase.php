@@ -6,6 +6,7 @@ namespace App\Application\UseCase\Board;
 
 use App\Domain\Repository\BoardUserRepository;
 use App\Domain\Repository\TaskRepository;
+use DomainException;
 use InvalidArgumentException;
 
 final class GetBoardTasksUseCase
@@ -15,11 +16,19 @@ final class GetBoardTasksUseCase
         private readonly BoardUserRepository $board_user_repository
     ) {}
 
-    public function execute(string $board_id, string $user_id): array
+    public function execute(string $board_id, string $requester_id): array
     {
-        $board_user = $this->board_user_repository->findByBoardAndUser($board_id, $user_id);
+        if (empty($board_id)) {
+            throw new InvalidArgumentException('The board_id cannot be empty.');
+        }
+
+        if (empty($requester_id)) {
+            throw new InvalidArgumentException('The requester_id cannot be empty.');
+        }
+
+        $board_user = $this->board_user_repository->findByBoardAndUser($board_id, $requester_id);
         if (!$board_user) {
-            throw new InvalidArgumentException('User does not have permission to access this board.');
+            throw new DomainException('Requester does not have permission to access this board.');
         }
 
         return $this->task_repository->findByBoardId($board_id);

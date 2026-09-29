@@ -10,6 +10,7 @@ use App\Domain\Enum\BoardRole;
 use App\Domain\Repository\BoardUserRepository;
 use App\Domain\Repository\TaskRepository;
 use DateTimeImmutable;
+use DomainException;
 use InvalidArgumentException;
 use Override;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -33,15 +34,51 @@ final class GetBoardTasksUseCaseTest extends TestCase
         );
     }
 
-    public function testItThrowsExceptionIfUserDoesNotHavePermission(): void
+    public function testItThrowsExceptionIfBoardIdIsEmpty(): void
+    {
+        $this->board_user_repository_mock
+            ->expects($this->never())
+            ->method('findByBoardAndUser');
+
+        $this->task_repository_mock
+            ->expects($this->never())
+            ->method('findByBoardId');
+
+        try {
+            $this->use_case->execute('', uuid_create(UUID_TYPE_RANDOM));
+            $this->fail('Expected InvalidArgumentException was not thrown.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertEquals('The board_id cannot be empty.', $exception->getMessage());
+        }
+    }
+
+    public function testItThrowsExceptionIfRequesterIdIsEmpty(): void
+    {
+        $this->board_user_repository_mock
+            ->expects($this->never())
+            ->method('findByBoardAndUser');
+
+        $this->task_repository_mock
+            ->expects($this->never())
+            ->method('findByBoardId');
+
+        try {
+            $this->use_case->execute(uuid_create(UUID_TYPE_RANDOM), '');
+            $this->fail('Expected InvalidArgumentException was not thrown.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertEquals('The requester_id cannot be empty.', $exception->getMessage());
+        }
+    }
+
+    public function testItThrowsExceptionIfRequesterDoesNotHavePermission(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
 
         $this->board_user_repository_mock
             ->expects($this->once())
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
+            ->with($board_id, $requester_id)
             ->willReturn(null);
 
         $this->task_repository_mock
@@ -49,22 +86,22 @@ final class GetBoardTasksUseCaseTest extends TestCase
             ->method('findByBoardId');
 
         try {
-            $this->use_case->execute($board_id, $user_id);
-            $this->fail('Expected InvalidArgumentException was not thrown.');
-        } catch (InvalidArgumentException $exception) {
-            $this->assertEquals('User does not have permission to access this board.', $exception->getMessage());
+            $this->use_case->execute($board_id, $requester_id);
+            $this->fail('Expected DomainException was not thrown.');
+        } catch (DomainException $exception) {
+            $this->assertEquals('Requester does not have permission to access this board.', $exception->getMessage());
         }
     }
 
     public function testItReturnsTasksSuccessfully(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
 
         $dummy_board_user = new BoardUser(
             id: uuid_create(UUID_TYPE_RANDOM),
             board_id: $board_id,
-            user_id: $user_id,
+            user_id: $requester_id,
             role: BoardRole::MEMBER,
             created_at: new DateTimeImmutable(),
             updated_at: new DateTimeImmutable(),
@@ -73,7 +110,7 @@ final class GetBoardTasksUseCaseTest extends TestCase
         $this->board_user_repository_mock
             ->expects($this->once())
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
+            ->with($board_id, $requester_id)
             ->willReturn($dummy_board_user);
 
         $expected_tasks = [];
@@ -84,7 +121,7 @@ final class GetBoardTasksUseCaseTest extends TestCase
             ->with($board_id)
             ->willReturn($expected_tasks);
 
-        $result = $this->use_case->execute($board_id, $user_id);
+        $result = $this->use_case->execute($board_id, $requester_id);
 
         $this->assertIsArray($result);
         $this->assertSame($expected_tasks, $result);
