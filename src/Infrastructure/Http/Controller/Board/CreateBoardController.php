@@ -78,9 +78,9 @@ final class CreateBoardController
             $data = $request->getParsedBody();
 
             $board = $this->use_case->execute(
-                user_id: $jwt_payload->sub,
-                name: $data['name'] ?? '',
-                description: $data['description'] ?? null
+                requester_id: strval($jwt_payload->sub),
+                name: strval($data['name'] ?? ''),
+                description: isset($data['description']) ? strval($data['description']) : null
             );
 
             $payload = json_encode([

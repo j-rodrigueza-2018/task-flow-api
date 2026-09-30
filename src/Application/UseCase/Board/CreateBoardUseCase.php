@@ -8,16 +8,23 @@ use App\Domain\Entity\Board;
 use App\Domain\Entity\BoardUser;
 use App\Domain\Enum\BoardRole;
 use App\Domain\Repository\BoardRepository;
+use App\Domain\Repository\BoardUserRepository;
 use DateTimeImmutable;
+use InvalidArgumentException;
 
 final class CreateBoardUseCase
 {
     public function __construct(
-        private readonly BoardRepository $board_repository
+        private readonly BoardRepository $board_repository,
+        private readonly BoardUserRepository $board_user_repository
     ) {}
 
-    public function execute(string $user_id, string $name, ?string $description = null): Board
+    public function execute(string $requester_id, string $name, ?string $description = null): Board
     {
+        if (empty($requester_id)) {
+            throw new InvalidArgumentException('The requester_id cannot be empty.');
+        }
+
         $board = new Board(
             id: uuid_create(UUID_TYPE_RANDOM),
             name: $name,
@@ -31,13 +38,13 @@ final class CreateBoardUseCase
         $board_user = new BoardUser(
             id: uuid_create(UUID_TYPE_RANDOM),
             board_id: $board->getId(),
-            user_id: $user_id,
+            user_id: $requester_id,
             role: BoardRole::OWNER,
             created_at: new DateTimeImmutable(),
             updated_at: new DateTimeImmutable()
         );
 
-        $this->board_repository->addUserToBoard($board_user);
+        $this->board_user_repository->save($board_user);
 
         return $board;
     }

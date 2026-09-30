@@ -51,13 +51,4 @@ interface BoardRepository
      * @return Board[] An array of all boards.
      */
     public function findAll(): array;
-
-    /**
-     * Associates a user to a board.
-     * 
-     * @param BoardUser $board_user The entity that represents the relationship.
-     * 
-     * @return void
-     */
-    public function addUserToBoard(BoardUser $board_user): void;
 }

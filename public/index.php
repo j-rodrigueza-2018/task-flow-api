@@ -6,6 +6,7 @@ use App\Infrastructure\Http\Controller\Board\DeleteBoardController;
 use App\Infrastructure\Http\Controller\Board\DeleteUserFromBoardController;
 use App\Infrastructure\Http\Controller\Board\GetBoardController;
 use App\Infrastructure\Http\Controller\Board\GetBoardTasksController;
+use App\Infrastructure\Http\Controller\Board\GetBoardUsersController;
 use App\Infrastructure\Http\Controller\Board\GetUserBoardsController;
 use App\Infrastructure\Http\Controller\Board\UpdateBoardController;
 use App\Infrastructure\Http\Controller\Task\AddUserToTaskController;
@@ -83,6 +84,7 @@ $app->group('/api/private', function (RouteCollectorProxy $group) {
     $group->get('/boards', GetUserBoardsController::class);
     $group->post('/boards', CreateBoardController::class);
     $group->get('/boards/{id}/tasks', GetBoardTasksController::class);
+    $group->get('/boards/{id}/users', GetBoardUsersController::class);
     $group->patch('/boards/{id}', UpdateBoardController::class);
     $group->delete('/boards/{id}', DeleteBoardController::class);
     $group->post('/boards/{id}/users', AddUserToBoardController::class);

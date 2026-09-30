@@ -9,6 +9,8 @@ use App\Domain\Entity\Board;
 use App\Domain\Entity\BoardUser;
 use App\Domain\Enum\BoardRole;
 use App\Domain\Repository\BoardRepository;
+use App\Domain\Repository\BoardUserRepository;
+use InvalidArgumentException;
 use Override;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -16,13 +18,33 @@ use PHPUnit\Framework\TestCase;
 final class CreateBoardUseCaseTest extends TestCase
 {
     private BoardRepository&MockObject $board_repository_mock;
+    private BoardUserRepository&MockObject $board_user_repository_mock;
     private CreateBoardUseCase $use_case;
 
     #[Override]
     protected function setUp(): void
     {
         $this->board_repository_mock = $this->createMock(BoardRepository::class);
-        $this->use_case = new CreateBoardUseCase($this->board_repository_mock);
+        $this->board_user_repository_mock = $this->createMock(BoardUserRepository::class);
+        $this->use_case = new CreateBoardUseCase($this->board_repository_mock, $this->board_user_repository_mock);
+    }
+
+    public function testItThrowsExceptionIfRequesterIdIsEmpty(): void
+    {
+        $this->board_repository_mock
+            ->expects($this->never())
+            ->method('save');
+
+        $this->board_user_repository_mock
+            ->expects($this->never())
+            ->method('save');
+
+        try {
+            $this->use_case->execute('', 'Test Board', 'This is a test board.');
+            $this->fail('Expected InvalidArgumentException was not thrown.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertEquals('The requester_id cannot be empty.', $exception->getMessage());
+        }
     }
 
     public function testItCreatesBoardSuccessfullyAndAssignsTheUserAsOwner(): void
@@ -45,9 +67,9 @@ final class CreateBoardUseCaseTest extends TestCase
             );
 
         // Verify that the board is linked to the user with the OWNER role.
-        $this->board_repository_mock
+        $this->board_user_repository_mock
             ->expects($this->once())
-            ->method('addUserToBoard')
+            ->method('save')
             ->with(
                 $this->callback(
                     function (BoardUser $board_user) use ($user_id) {

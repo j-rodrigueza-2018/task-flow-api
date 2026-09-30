@@ -17,6 +17,7 @@ final class PostgresBoardUserRepository implements BoardUserRepository
         private readonly PDO $pdo
     ) {}
 
+    #[Override]
     public function save(BoardUser $board_user): void
     {
         $stmt = $this->pdo->prepare(<<<EOH
@@ -47,6 +48,7 @@ final class PostgresBoardUserRepository implements BoardUserRepository
         ]);
     }
 
+    #[Override]
     public function findByBoardAndUser(string $board_id, string $user_id): ?BoardUser
     {
         $stmt = $this->pdo->prepare('SELECT * FROM board_users WHERE board_id = :board_id AND user_id = :user_id');
@@ -69,5 +71,26 @@ final class PostgresBoardUserRepository implements BoardUserRepository
             created_at: new DateTimeImmutable($row['created_at']),
             updated_at: new DateTimeImmutable($row['updated_at'])
         );
+    }
+
+    #[Override]
+    public function findByBoardId(string $board_id): array
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM board_users WHERE board_id = :board_id ORDER BY created_at ASC');
+        $stmt->execute(['board_id' => $board_id]);
+
+        $board_users = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $board_users[] = new BoardUser(
+                id: $row['id'],
+                board_id: $row['board_id'],
+                user_id: $row['user_id'],
+                role: BoardRole::from($row['role']),
+                created_at: new DateTimeImmutable($row['created_at']),
+                updated_at: new DateTimeImmutable($row['updated_at'])
+            );
+        }
+
+        return $board_users;
     }
 }

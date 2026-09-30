@@ -9,6 +9,62 @@ servers:
     description: 'Local Development Server'
 paths:
   '/api/private/boards/{id}/users':
+    get:
+      tags:
+        - Boards
+      summary: 'Get all users of a board.'
+      description: 'Retrieves a list of all users belonging to a specific board. The requester must be a member of the board.'
+      operationId: d34c0e36ced056af15004bf55eac28aa
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'The unique identifier of the board.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Board users retrieved successfully.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'Board users retrieved successfully.' }
+                  data: { type: array, items: { properties: { id: { type: string, format: uuid }, board_id: { type: string, format: uuid }, user_id: { type: string, format: uuid }, role: { type: string, example: MEMBER }, created_at: { type: string, format: date-time }, updated_at: { type: string, format: date-time } }, type: object } }
+                type: object
+        '400':
+          description: 'Bad request (e.g., empty board id).'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'The board_id cannot be empty.' }
+                type: object
+        '403':
+          description: 'Permission denied.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'Requester does not have permission to access this board.' }
+                type: object
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'An error occurred while retrieving board users.' }
+                type: object
+      security:
+        -
+          bearerAuth: []
     post:
       tags:
         - Boards

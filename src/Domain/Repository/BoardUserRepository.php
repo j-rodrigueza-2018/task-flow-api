@@ -36,4 +36,13 @@ interface BoardUserRepository
      * @return BoardUser|null The found relationship or null if not found.
      */
     public function findByBoardAndUser(string $board_id, string $user_id): ?BoardUser;
+
+    /**
+     * Finds all users associated with a specific board.
+     * 
+     * @param string $board_id The ID of the board.
+     * 
+     * @return BoardUser[] An array of BoardUser relationships.
+     */
+    public function findByBoardId(string $board_id): array;
 }
