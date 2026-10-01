@@ -142,6 +142,44 @@ paths:
         -
           bearerAuth: []
   /api/private/boards:
+    get:
+      tags:
+        - Boards
+      summary: 'Get all boards for the authenticated user.'
+      description: 'Retrieves a list of all boards the authenticated user belongs to.'
+      operationId: 5281bd07f4503c8a8e6255ee0a4eef16
+      responses:
+        '200':
+          description: 'User boards retrieved successfully.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'User boards retrieved successfully.' }
+                  data: { type: array, items: { properties: { id: { type: string, format: uuid }, name: { type: string }, description: { type: string, nullable: true }, created_at: { type: string, format: date-time }, updated_at: { type: string, format: date-time } }, type: object } }
+                type: object
+        '400':
+          description: 'Bad request.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'The requester_id cannot be empty.' }
+                type: object
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'An error occurred while retrieving user boards.' }
+                type: object
+      security:
+        -
+          bearerAuth: []
     post:
       tags:
         - Boards
