@@ -34,10 +34,46 @@ final class UpdateBoardUseCaseTest extends TestCase
         );
     }
 
+    public function testItThrowsExceptionIfBoardIdIsEmpty(): void
+    {
+        $this->board_repository_mock
+            ->expects($this->never())
+            ->method('findById');
+
+        $this->board_user_repository_mock
+            ->expects($this->never())
+            ->method('findByBoardAndUser');
+
+        try {
+            $this->use_case->execute('', uuid_create(UUID_TYPE_RANDOM), 'New Name', 'New Description');
+            $this->fail('Expected InvalidArgumentException was not thrown.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertEquals('The board_id cannot be empty.', $exception->getMessage());
+        }
+    }
+
+    public function testItThrowsExceptionIfRequesterIdIsEmpty(): void
+    {
+        $this->board_repository_mock
+            ->expects($this->never())
+            ->method('findById');
+
+        $this->board_user_repository_mock
+            ->expects($this->never())
+            ->method('findByBoardAndUser');
+
+        try {
+            $this->use_case->execute(uuid_create(UUID_TYPE_RANDOM), '', 'New Name', 'New Description');
+            $this->fail('Expected InvalidArgumentException was not thrown.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertEquals('The requester_id cannot be empty.', $exception->getMessage());
+        }
+    }
+
     public function testItThrowsExceptionIfBoardIsNotFound(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
 
         $this->board_repository_mock
             ->expects($this->once())
@@ -54,17 +90,17 @@ final class UpdateBoardUseCaseTest extends TestCase
             ->method('save');
 
         try {
-            $this->use_case->execute($board_id, $user_id, 'New Name Valid', 'New Description');
+            $this->use_case->execute($board_id, $requester_id, 'New Name Valid', 'New Description');
             $this->fail('Expected InvalidArgumentException was not thrown.');
         } catch (InvalidArgumentException $exception) {
             $this->assertEquals('Board not found.', $exception->getMessage());
         }
     }
 
-    public function testItThrowsExceptionIfUserDoesNotHavePermission(): void
+    public function testItThrowsExceptionIfRequesterDoesNotHavePermission(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
 
         $dummy_board = new Board(
             id: $board_id,
@@ -83,7 +119,7 @@ final class UpdateBoardUseCaseTest extends TestCase
         $this->board_user_repository_mock
             ->expects($this->once())
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
+            ->with($board_id, $requester_id)
             ->willReturn(null);
 
         $this->board_repository_mock
@@ -91,17 +127,17 @@ final class UpdateBoardUseCaseTest extends TestCase
             ->method('save');
 
         try {
-            $this->use_case->execute($board_id, $user_id, 'New Name Valid', 'New Description');
+            $this->use_case->execute($board_id, $requester_id, 'New Name Valid', 'New Description');
             $this->fail('Expected InvalidArgumentException was not thrown.');
         } catch (InvalidArgumentException $exception) {
-            $this->assertEquals('User does not have permission to update this board.', $exception->getMessage());
+            $this->assertEquals('Requester does not have permission to update this board.', $exception->getMessage());
         }
     }
 
     public function testItDoesNotSaveIfThereAreNoChanges(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
 
         $dummy_board = new Board(
             id: $board_id,
@@ -120,7 +156,7 @@ final class UpdateBoardUseCaseTest extends TestCase
         $dummy_board_user = new BoardUser(
             id: uuid_create(UUID_TYPE_RANDOM),
             board_id: $board_id,
-            user_id: $user_id,
+            user_id: $requester_id,
             role: BoardRole::MEMBER,
             created_at: new DateTimeImmutable(),
             updated_at: new DateTimeImmutable()
@@ -129,14 +165,14 @@ final class UpdateBoardUseCaseTest extends TestCase
         $this->board_user_repository_mock
             ->expects($this->once())
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
+            ->with($board_id, $requester_id)
             ->willReturn($dummy_board_user);
 
         $this->board_repository_mock
             ->expects($this->never())
             ->method('save');
 
-        $result = $this->use_case->execute($board_id, $user_id, null, null);
+        $result = $this->use_case->execute($board_id, $requester_id, null, null);
 
         $this->assertSame($dummy_board, $result);
     }
@@ -144,7 +180,7 @@ final class UpdateBoardUseCaseTest extends TestCase
     public function testItSavesBoardIfOnlyNameIsUpdated(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
         $updated_name = 'Updated Valid Name';
 
         $dummy_board = new Board(
@@ -164,7 +200,7 @@ final class UpdateBoardUseCaseTest extends TestCase
         $dummy_board_user = new BoardUser(
             id: uuid_create(UUID_TYPE_RANDOM),
             board_id: $board_id,
-            user_id: $user_id,
+            user_id: $requester_id,
             role: BoardRole::MEMBER,
             created_at: new DateTimeImmutable(),
             updated_at: new DateTimeImmutable()
@@ -173,7 +209,7 @@ final class UpdateBoardUseCaseTest extends TestCase
         $this->board_user_repository_mock
             ->expects($this->once())
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
+            ->with($board_id, $requester_id)
             ->willReturn($dummy_board_user);
 
         $this->board_repository_mock
@@ -181,7 +217,7 @@ final class UpdateBoardUseCaseTest extends TestCase
             ->method('save')
             ->with($dummy_board);
 
-        $result = $this->use_case->execute($board_id, $user_id, $updated_name, null);
+        $result = $this->use_case->execute($board_id, $requester_id, $updated_name, null);
 
         $this->assertEquals($updated_name, $result->getName());
         $this->assertEquals($dummy_board->getDescription(), $result->getDescription());
@@ -190,7 +226,7 @@ final class UpdateBoardUseCaseTest extends TestCase
     public function testItSavesBoardIfOnlyDescriptionIsUpdated(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
         $updated_description = 'Updated description';
 
         $dummy_board = new Board(
@@ -210,7 +246,7 @@ final class UpdateBoardUseCaseTest extends TestCase
         $dummy_board_user = new BoardUser(
             id: uuid_create(UUID_TYPE_RANDOM),
             board_id: $board_id,
-            user_id: $user_id,
+            user_id: $requester_id,
             role: BoardRole::MEMBER,
             created_at: new DateTimeImmutable(),
             updated_at: new DateTimeImmutable()
@@ -219,7 +255,7 @@ final class UpdateBoardUseCaseTest extends TestCase
         $this->board_user_repository_mock
             ->expects($this->once())
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
+            ->with($board_id, $requester_id)
             ->willReturn($dummy_board_user);
 
         $this->board_repository_mock
@@ -227,7 +263,7 @@ final class UpdateBoardUseCaseTest extends TestCase
             ->method('save')
             ->with($dummy_board);
 
-        $result = $this->use_case->execute($board_id, $user_id, null, $updated_description);
+        $result = $this->use_case->execute($board_id, $requester_id, null, $updated_description);
 
         $this->assertEquals($dummy_board->getName(), $result->getName());
         $this->assertEquals($updated_description, $result->getDescription());
@@ -236,7 +272,7 @@ final class UpdateBoardUseCaseTest extends TestCase
     public function testItSavesBoardIfBothFieldsAreUpdated(): void
     {
         $board_id = uuid_create(UUID_TYPE_RANDOM);
-        $user_id = uuid_create(UUID_TYPE_RANDOM);
+        $requester_id = uuid_create(UUID_TYPE_RANDOM);
         $updated_name = 'Updated Valid Name';
         $updated_description = 'Updated description';
 
@@ -257,7 +293,7 @@ final class UpdateBoardUseCaseTest extends TestCase
         $dummy_board_user = new BoardUser(
             id: uuid_create(UUID_TYPE_RANDOM),
             board_id: $board_id,
-            user_id: $user_id,
+            user_id: $requester_id,
             role: BoardRole::MEMBER,
             created_at: new DateTimeImmutable(),
             updated_at: new DateTimeImmutable()
@@ -266,7 +302,7 @@ final class UpdateBoardUseCaseTest extends TestCase
         $this->board_user_repository_mock
             ->expects($this->once())
             ->method('findByBoardAndUser')
-            ->with($board_id, $user_id)
+            ->with($board_id, $requester_id)
             ->willReturn($dummy_board_user);
 
         $this->board_repository_mock
@@ -274,7 +310,7 @@ final class UpdateBoardUseCaseTest extends TestCase
             ->method('save')
             ->with($dummy_board);
 
-        $result = $this->use_case->execute($board_id, $user_id, $updated_name, $updated_description);
+        $result = $this->use_case->execute($board_id, $requester_id, $updated_name, $updated_description);
 
         $this->assertEquals($updated_name, $result->getName());
         $this->assertEquals($updated_description, $result->getDescription());

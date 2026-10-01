@@ -331,6 +331,69 @@ paths:
       security:
         -
           bearerAuth: []
+    patch:
+      tags:
+        - Boards
+      summary: 'Update an existing board.'
+      description: 'Updates the name and/or description of a specific board. The requester must be a member of the board.'
+      operationId: e5d0336b80ce9f768290be0b6c3a10db
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'The unique identifier of the board.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  description: 'The new name of the board.'
+                  type: string
+                  example: 'Updated Project Board'
+                description:
+                  description: 'The new description of the board.'
+                  type: string
+                  example: 'Updated description with new milestones.'
+                  nullable: true
+              type: object
+      responses:
+        '200':
+          description: 'Board updated successfully.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'Board updated successfully.' }
+                  data: { $ref: '#/components/schemas/Board' }
+                type: object
+        '400':
+          description: 'Bad request or permission denied.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'Board not found. / Requester does not have permission to update this board.' }
+                type: object
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'An error occurred while updating the board.' }
+                type: object
+      security:
+        -
+          bearerAuth: []
   '/api/private/boards/{id}/users/{user_id}':
     delete:
       tags:

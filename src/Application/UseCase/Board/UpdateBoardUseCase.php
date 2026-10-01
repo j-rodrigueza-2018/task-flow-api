@@ -16,16 +16,24 @@ final class UpdateBoardUseCase
         private readonly BoardUserRepository $board_user_repository
     ) {}
 
-    public function execute(string $board_id, string $user_id, ?string $name, ?string $description): Board
+    public function execute(string $board_id, string $requester_id, ?string $name, ?string $description): Board
     {
+        if (empty($board_id)) {
+            throw new InvalidArgumentException('The board_id cannot be empty.');
+        }
+
+        if (empty($requester_id)) {
+            throw new InvalidArgumentException('The requester_id cannot be empty.');
+        }
+
         $board = $this->board_repository->findById($board_id);
         if (!$board) {
             throw new InvalidArgumentException('Board not found.');
         }
 
-        $board_user = $this->board_user_repository->findByBoardAndUser($board_id, $user_id);
+        $board_user = $this->board_user_repository->findByBoardAndUser($board_id, $requester_id);
         if (!$board_user) {
-            throw new InvalidArgumentException('User does not have permission to update this board.');
+            throw new InvalidArgumentException('Requester does not have permission to update this board.');
         }
 
         $has_changes = false;
