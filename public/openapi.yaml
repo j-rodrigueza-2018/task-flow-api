@@ -862,6 +862,111 @@ paths:
       security:
         -
           bearerAuth: []
+  /api/login:
+    post:
+      tags:
+        - Users
+      summary: 'Authenticate user and get a JWT token.'
+      description: 'Verifies the user credentials and returns a JWT token for accessing protected routes.'
+      operationId: e81fcb9e05d466e2626c31fece753f2b
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+                password:
+                  type: string
+                  format: password
+                  example: SuperSecret123!
+              type: object
+      responses:
+        '200':
+          description: 'User logged in successfully.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'User logged in successfully.' }
+                  token: { type: string, example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... }
+                type: object
+        '401':
+          description: 'Unauthorized (invalid credentials).'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'Invalid email or password.' }
+                type: object
+  /api/users:
+    post:
+      tags:
+        - Users
+      summary: 'Register a new user.'
+      description: 'Creates a new user account in the system.'
+      operationId: f19592d13379613bbdd150fbeb61649f
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - nickname
+                - email
+                - password
+              properties:
+                nickname:
+                  description: 'The desired nickname (4-20 chars).'
+                  type: string
+                  example: johndoe
+                email:
+                  description: 'A valid email address.'
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+                password:
+                  description: 'The user password (min 8 chars).'
+                  type: string
+                  format: password
+                  example: SuperSecret123!
+              type: object
+      responses:
+        '201':
+          description: 'User registered successfully.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 'User registered successfully.' }
+                type: object
+        '400':
+          description: 'Validation error (e.g., short password or invalid email format).'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'The password must be at least 8 characters long.' }
+                type: object
+        '409':
+          description: 'Conflict error (e.g., email already registered).'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: error }
+                  message: { type: string, example: 'A user with this email already exists.' }
+                type: object
 components:
   schemas:
     Board:
@@ -1008,6 +1113,34 @@ components:
           format: date-time
           example: '2024-06-01T12:00:00Z'
       type: object
+    User:
+      description: 'Represents a user entity in the system.'
+      properties:
+        id:
+          description: 'Unique identifier for the user.'
+          type: string
+          format: uuid
+          example: c9f87a32-1a45-4c67-8b9a-1c2d3e4f5a6b
+        nickname:
+          description: 'The display name of the user (between 4 and 20 characters).'
+          type: string
+          example: johndoe
+        email:
+          description: 'The user email address.'
+          type: string
+          format: email
+          example: john.doe@example.com
+        created_at:
+          description: 'The timestamp when the user was registered.'
+          type: string
+          format: date-time
+          example: '2024-06-01T12:00:00Z'
+        updated_at:
+          description: 'The timestamp when the user profile was last updated.'
+          type: string
+          format: date-time
+          example: '2024-06-02T15:30:00Z'
+      type: object
   securitySchemes:
     bearerAuth:
       type: http
@@ -1020,3 +1153,6 @@ tags:
   -
     name: Tasks
     description: Tasks
+  -
+    name: Users
+    description: Users
